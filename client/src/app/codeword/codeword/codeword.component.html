@@ -1,0 +1,13 @@
+<h2>codeword</h2>
+
+<div class="grid">
+
+    <div class="row" *ngFor="let row of puzzle">
+        <div *ngFor="let cell of row" style="display: inline-block">
+            <input *ngIf="cell !== ' '" type="text" maxlength="1" style="display: inline-block; width: 32px; height: 30px" [value]="getKey(cell)">
+            
+            <span *ngIf="cell === ' '" style="display: inline-block; width: 36px; height: 36px"></span>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,11 @@
+<div id="title">
+    <h1>
+        big-screen-puzzles
+    </h1>
+</div>
+
+<div id="menu">
+    <ul>
+        <li *ngFor="let game of games"><a [routerLink]="game">{{game}}</a></li>
+    </ul>
+</div>

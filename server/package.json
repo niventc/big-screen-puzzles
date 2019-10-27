@@ -1,0 +1,20 @@
+{
+  "name": "big-screen-puzzles-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -w",
+    "serve": "node dist/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.1",
+    "typescript": "^3.6.4"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

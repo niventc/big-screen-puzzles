@@ -1,0 +1,16 @@
+:host {
+    padding: 10px;
+}
+
+.grid {
+    padding: 50px;
+
+    .row {
+        height: 36px; 
+        
+        input {
+            text-align: center;
+            text-transform: uppercase;
+        }
+    }
+}
