@@ -7,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CodewordComponent implements OnInit {
 
-  public characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  public characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
   public puzzle: string[][] = [
     ['H', 'E', 'L', 'L', 'O'],
@@ -17,26 +17,52 @@ export class CodewordComponent implements OnInit {
     [' ', ' ', 'L', ' ', ' ']
   ];
 
-  public key: Map<string, number> = new Map();
+  public key: string[] = [];
 
-  constructor() { }
+  public gridSize = 14;
+  public grid: string[][];
+
+  public selectedCharacter = '';
+
+  constructor() {
+    this.grid = [];
+    for (let x = 0; x < this.gridSize; x++) {
+      this.grid.push([]);
+
+      for (let y = 0; y < this.gridSize; y++) {
+        this.grid[x][y] = '';
+      }
+    }
+  }
 
   public ngOnInit(): void {
-    const key = this.shuffleArray();
-
-    key.forEach((v, i) => {
-      this.key.set(v, i + 1);
-    });
+    this.key = this.shuffleArray();
 
     console.log(this.key);
   }
 
-  public getKey(character: string): number {
-    return this.key.get(character);
+  public getKey(character: string): string {
+    return character ? this.key.indexOf(character).toString() : ' ';
+  }
+
+  public selectCharacter(character: string): void {
+    this.selectedCharacter = character;
+  }
+
+  public getCell(rowIndex: number, columnIndex: number): string {
+    if (this.grid[rowIndex][columnIndex]) {
+      console.log(rowIndex, columnIndex, this.grid[rowIndex][columnIndex]);
+    }
+    return this.grid[rowIndex][columnIndex];
+  }
+
+  public updateCell(rowIndex: number, columnIndex: number, event: string): void {
+    this.grid[rowIndex][columnIndex] = event;
+    console.log(rowIndex, columnIndex, event, this.grid);
   }
 
   private shuffleArray(): string[] {
-    const characters = this.characters.split('');
+    const characters = [...this.characters];
 
     for (let i = characters.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -44,7 +70,6 @@ export class CodewordComponent implements OnInit {
     }
 
     return characters;
-
   }
 
 }
