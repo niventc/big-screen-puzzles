@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { CodewordComponent } from './codeword/codeword.component';
+import { SessionsModule } from '../sessions/sessions.module';
 
 
 
@@ -10,7 +11,8 @@ import { CodewordComponent } from './codeword/codeword.component';
   declarations: [CodewordComponent],
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    SessionsModule
   ]
 })
 export class CodewordModule { }

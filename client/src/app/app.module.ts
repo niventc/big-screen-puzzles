@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CodewordModule } from './codeword/codeword.module';
+import { SessionsModule } from './sessions/sessions.module';
 import { HomeComponent } from './home/home.component';
 
 @NgModule({
@@ -14,7 +15,8 @@ import { HomeComponent } from './home/home.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    CodewordModule
+    CodewordModule,
+    SessionsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

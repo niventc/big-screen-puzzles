@@ -1,22 +1,51 @@
 import * as express from 'express';
+import * as expressWs from 'express-ws';
 
 import { WordController } from './words/word.controller';
 import { WordService } from './words/word.service';
+import { SessionController } from './sessions/session.controller';
 
 export interface Controller {
     router: express.Router;
 }
 
+export interface WebSocketController {
+    setup(router: expressWs.Router): void;
+}
+
 class Server {
     public app: express.Application;
+    private wsInstance: expressWs.Instance;
 
     constructor(
         controllers: Controller[], 
+        webSocketControllers: WebSocketController[], 
         private port: number
     ) {
-        this.app = express();
+        const app = express();
+
+        this.wsInstance = expressWs(app);
+        this.app = this.wsInstance.app;
 
         this.initializeControllers(controllers);
+        this.initializeWebSocketControllers(webSocketControllers);
+    }
+
+    private initializeWebSocketControllers(controllers: WebSocketController[]): void {
+        controllers.forEach(controller => {
+            const router = express.Router();
+            this.wsInstance.applyTo(router);
+
+            controller.setup(router);
+
+            this.app.use('/', router);
+        });
+
+        const wss = this.wsInstance.getWss();
+        wss.on('connection', (ws, req, client) => {
+            console.log(client);
+            console.log(wss.clients);
+        })
     }
 
     private initializeControllers(controllers: Controller[]): void {
@@ -32,4 +61,4 @@ class Server {
     }
 }
 
-new Server([new WordController(new WordService())], 3000).listen();
+new Server([new WordController(new WordService())], [new SessionController()], 3000).listen();
