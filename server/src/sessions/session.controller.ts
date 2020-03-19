@@ -91,7 +91,7 @@ export class SessionController implements WebSocketController {
         });
 
         // console.log("missing " + missing);
-        return missing.length > 0 ? [`[${missing.join('')}]`] : ['.*'];
+        return missing.length > 0 ? [`[${missing.join('')}]`] : ['[a-z]'];
     }
 
 
@@ -201,7 +201,7 @@ export class SessionController implements WebSocketController {
                 if (hoz.length >= 3) {
                     const pattern = hoz.map(x => {
                         if (x === ' ') {
-                            return '[a-zA-Z]{1}';
+                            return '[a-z]{1}';
                         } else {
                             return `[${x}]{1}`;
                         }
@@ -250,7 +250,7 @@ export class SessionController implements WebSocketController {
         let end = new Date().getTime();
         console.log(`Completed in ${end-start} ms`);
 
-        console.log(grid);
+        grid.forEach(row => console.log(row));
         }
     }
 
@@ -304,9 +304,9 @@ export class SessionController implements WebSocketController {
             while ((!word || word.length < 3 || !word.match(patternString) || word.length > length || this.words.includes(word)) && count <= limit) {
                 // console.log(`${word} does not match ${patternString}`);
                 word = this.wordService.getRandomWord();
-                if (word) {
-                    word = word.toLowerCase();
-                }
+                // if (word) {
+                //     word = word.toLowerCase();
+                // }
                 count++;
             }
             // console.log(`hit count limit, trimming pattern ${count} ${pattern}`)
