@@ -6,10 +6,12 @@
   },
   "files": [
     "src/main.ts",
-    "src/polyfills.ts"
+    "src/polyfills.ts",
+    "../contract/index.ts"
   ],
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "./node_modules/big-screen-puzzles-contract/index.ts"
   ],
   "exclude": [
     "src/test.ts",

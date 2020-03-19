@@ -1,9 +1,12 @@
 import * as express from 'express';
 import * as expressWs from 'express-ws';
+import { v4 as uuidv4 } from 'uuid';
 
 import { WordController } from './words/word.controller';
 import { WordService } from './words/word.service';
 import { SessionController } from './sessions/session.controller';
+import { ClientService } from './client.service';
+import { ClientConnected } from 'big-screen-puzzles-contract';
 
 export interface Controller {
     router: express.Router;
@@ -18,8 +21,9 @@ class Server {
     private wsInstance: expressWs.Instance;
 
     constructor(
-        controllers: Controller[], 
-        webSocketControllers: WebSocketController[], 
+        private clientService: ClientService,
+        private controllers: Controller[], 
+        private webSocketControllers: WebSocketController[], 
         private port: number
     ) {
         const app = express();
@@ -42,9 +46,20 @@ class Server {
         });
 
         const wss = this.wsInstance.getWss();
-        wss.on('connection', (ws, req, client) => {
-            console.log(client);
-            console.log(wss.clients);
+        wss.on('connection', (ws: WebSocket, req, client) => {
+            const uuid = clientService.addClient(ws);
+
+            const clientConnected = new ClientConnected();
+            clientConnected.clientId = uuid;
+            ws.send(JSON.stringify(clientConnected));
+
+            ws.onopen = (e) => {
+                // console.log(e);
+            }
+
+            ws.onclose = (e) => {
+                // console.log(e);
+            }
         })
     }
 
@@ -61,4 +76,11 @@ class Server {
     }
 }
 
-new Server([new WordController(new WordService())], [new SessionController()], 3000).listen();
+const clientService = new ClientService();
+const wordService = new WordService();
+new Server(
+    clientService,
+    [new WordController(wordService)], 
+    [new SessionController(clientService, wordService)], 
+    3000
+).listen();

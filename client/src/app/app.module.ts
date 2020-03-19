@@ -6,11 +6,14 @@ import { AppComponent } from './app.component';
 import { CodewordModule } from './codeword/codeword.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { HomeComponent } from './home/home.component';
+import { WebSocketService } from './websocket.service';
+import { UserComponent } from './user/user.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent
+    HomeComponent,
+    UserComponent
   ],
   imports: [
     BrowserModule,
@@ -18,7 +21,9 @@ import { HomeComponent } from './home/home.component';
     CodewordModule,
     SessionsModule
   ],
-  providers: [],
+  providers: [
+    WebSocketService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

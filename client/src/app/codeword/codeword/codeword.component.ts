@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { WebSocketService } from 'src/app/websocket.service';
+import { filter, first, map } from 'rxjs/operators';
+import { NewGameCreated, NewGame } from 'big-screen-puzzles-contract';
 
 @Component({
   selector: 'app-codeword',
@@ -24,7 +28,11 @@ export class CodewordComponent implements OnInit {
 
   public selectedCharacter = '';
 
-  constructor() {
+  constructor(
+    private webSocketService: WebSocketService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
     this.grid = [];
     for (let x = 0; x < this.gridSize; x++) {
       this.grid.push([]);
@@ -33,6 +41,18 @@ export class CodewordComponent implements OnInit {
         this.grid[x][y] = '';
       }
     }
+  }
+
+  public newGame(): void {
+    this.webSocketService.message$
+      .pipe(
+        filter(message => message.type === "NewGameCreated"),
+        first(),
+        map(message => message as NewGameCreated)
+      )
+      .subscribe(newGameCreated => this.router.navigate(['game', newGameCreated.gameId], { relativeTo: this.route }));
+
+    this.webSocketService.sendMessage(new NewGame());
   }
 
   public ngOnInit(): void {

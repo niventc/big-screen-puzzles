@@ -1,0 +1,20 @@
+#client-status {
+    background-color: #222;
+    color: white;
+    padding: 24px;
+    border-radius: 24px;
+    display: inline-block;
+
+    #circle {
+        content: ' ';
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border-radius: 9px;
+        background-color: red;
+
+        &.connected {
+            background-color: green;
+        }
+    }
+}

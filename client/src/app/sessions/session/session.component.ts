@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import { NewGame, JoinGame } from 'big-screen-puzzles-contract';
+import { WebSocketService } from 'src/app/websocket.service';
 
 @Component({
   selector: 'app-session',
@@ -8,21 +9,20 @@ import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 })
 export class SessionComponent implements OnInit {
 
-  private socket$: WebSocketSubject<string>;
-
-  constructor() { }
+  constructor(
+    private webSocketService: WebSocketService
+  ) { }
 
   ngOnInit() {
-    this.socket$ = webSocket('ws://localhost:3000/api/sessions');
-  
-    this.socket$.subscribe(
-      (message) => console.log(message)
-    );
   }
 
-  public sendMessage(): void {
-    console.log("sending");
-    this.socket$.next("hello!");
+  public newGame(): void {
+    this.webSocketService.sendMessage(new NewGame());
   }
 
+  public joinGame(): void {
+    const joinGame = new JoinGame();
+    joinGame.gameId = "new id";
+    this.webSocketService.sendMessage(joinGame);
+  }
 }

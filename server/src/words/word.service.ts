@@ -44,7 +44,12 @@ class IndexRow {
     public synset_offset: number;
 }
 
+export type WordType = "noun" | "verb" | "adj" | "adv" | string;
+
 class DataRow {
+    // Type
+    public type: WordType;
+
     // Current byte offset in the file represented as an 8 digit decimal integer.
     public synset_offset: number;
 
@@ -119,7 +124,8 @@ export class WordService {
     ];
 
     private indices: IndexRow[] = [];
-    private data: DataRow[] = [];
+    private data = new Map<string, DataRow[]>();
+    public totalSize = 0;
 
     constructor() {
         this.types.forEach(type => {       
@@ -135,24 +141,56 @@ export class WordService {
                     console.log(`Read ${this.indices.length} rows from ${indexPath}`);
                 });    
 
-            const dataPath = `./src/words/wn3.1.dict/dict/data.${type}`;     
+            const dataPath = `./src/words/wn3.1.dict/dict/data.${type}`; 
+            const dataRows = [];    
             this.readFile(dataPath, 
                 (line) => {
                     const result = this.parseDataLine(line);
                     if (result) {
-                        this.data.push(result);
+                        result.type = type;
+                        dataRows.push(result);
+                        this.totalSize++;
                     }
                 },
                 () => {
-                    console.log(`Read ${this.indices.length} rows from ${dataPath}`);
+                    console.log(`Read ${dataRows.length} rows from ${dataPath}`);
                 });
+            this.data.set(type, dataRows);
         });
     }
 
     public findWord(word: string): string {
-        const result = this.data.find(x => x.words.find(y => y.word === word) !== undefined);
-        
-        return result ? result.gloss : `Unable to find '${word}'`;
+        for (const [_, values] of this.data) {
+            const word = values.find(x => x.words.find(w => w.word === word) !== undefined);
+            if (word) {
+                return word.gloss;
+            }
+        }
+        return `Unable to find '${word}'`;
+    }
+
+    public getRandomWord(type?: WordType): string {
+        if (!type) {
+            type = this.types[Math.round(Math.random() * 4)];
+        }
+
+        for (const [key, values] of this.data) {
+            if (key !== type) {
+                continue;
+            }
+
+            while (true) {
+                const length = values.length;
+                const rand = Math.round(Math.random() * length);
+                if (values[rand] && values[rand].words) {
+                    const word = values[rand].words[0];
+
+                    if (word && word.word.match("^[a-zA-Z ]*$")) {
+                        return word.word;
+                    }
+                }                
+            }
+        }
     }
 
     private readFile(filePath: string, lineHandler: (line: string) => void, closeHandler: () => void): void {

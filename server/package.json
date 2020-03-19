@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc -w",
     "serve": "node dist/server.js",
+    "start": "ts-node-dev ./src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -13,10 +14,15 @@
   "devDependencies": {
     "@types/express": "^4.17.1",
     "@types/express-ws": "^3.0.0",
+    "@types/uuid": "^7.0.0",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "tslib": "^1.11.1",
     "typescript": "^3.6.4"
   },
   "dependencies": {
+    "big-screen-puzzles-contract": "file:../contract",
     "express": "^4.17.1",
-    "express-ws": "^4.0.0"
+    "express-ws": "^4.0.0",
+    "uuid": "^7.0.2"
   }
 }

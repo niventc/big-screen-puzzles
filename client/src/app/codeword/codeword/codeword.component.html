@@ -1,45 +1,5 @@
 <h2>codeword</h2>
 
-<div>
-    <h1>Sessions</h1>
-    <app-session></app-session>
-</div>
+<button (click)="newGame()">New Game</button>
 
-<div class="grid">
-
-    <div class="row" *ngFor="let row of grid; trackBy index; index as rowIndex">
-        <div *ngFor="let cell of row; trackBy index; index as columnIndex" style="display: inline-block">
-            <button type="text" 
-                maxlength="1" 
-                style="display: inline-block; width: 32px; height: 30px"
-                (click)="updateCell(rowIndex, columnIndex, selectedCharacter)">
-                {{getCell(rowIndex, columnIndex)}}
-            </button>            
-        </div>
-    </div>
-
-</div>
-
-<h1>Control</h1>
-<div class="grid">
-
-    <div class="row" *ngFor="let char of characters" style="display: inline-block">
-        <div style="display: inline-block">
-            <button style="display: inline-block; width: 32px; height: 30px" [ngClass]="{ 'selected': char === selectedCharacter }" (click)="selectCharacter(char)">
-                {{char}}
-            </button>
-        </div>
-    </div>
-
-</div>
-
-<h1>Key</h1>
-<div class="grid">
-
-    <div class="row" *ngFor="let char of key" style="display: inline-block">
-        <div style="display: inline-block">
-            <input type="text" maxlength="1" style="display: inline-block; width: 32px; height: 30px" [value]="char">            
-        </div>
-    </div>
-
-</div>
+<router-outlet></router-outlet>
