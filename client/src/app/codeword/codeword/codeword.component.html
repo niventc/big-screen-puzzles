@@ -3,3 +3,40 @@
 <button (click)="newGame()">New Game</button>
 
 <router-outlet></router-outlet>
+
+<div style="display: flex">
+    <div class="grid" style="flex: 1 1 500px">
+        <div class="row" *ngFor="let row of grid; index as rowIndex" style="display: flex;">
+            <div *ngFor="let cell of row; index as columnIndex" 
+                class="cell"
+                [ngClass]="{ 'blank': cell.isEmpty }"
+                style="flex: 0 0 32px; position: relative;"
+                (click)="updateCell(rowIndex, columnIndex, selectedCharacter)">
+                    <ng-container *ngIf="!cell.isEmpty">
+                        <input type="text" class="input-cell" maxlength="1" [value]="cell.value ">  
+                        <span style="font-size: 8px; position: absolute; top: 1px; left: 1px">{{cell.key}}</span>   
+                    </ng-container>
+            </div>
+        </div>
+    </div>
+
+    <div style="flex: 1 1 auto">
+        <h1>Control</h1>    
+        <div class="row" style="display: flex; width: 416px; flex-flow: row; flex-wrap: wrap;">
+            <button style="flex: 0 0 32px; height: 32px" 
+                    *ngFor="let char of characters" 
+                    [ngClass]="{ 'selected': char === selectedCharacter }" 
+                    (click)="selectCharacter(char)">
+                {{char}}
+            </button>
+        </div>
+
+        <h1>Key</h1>        
+        <div class="row" style="display: flex; width: 416px; flex-flow: row; flex-wrap: wrap;">
+            <div *ngFor="let char of key" style="position: relative;">
+                <input type="text" class="input-cell" maxlength="1" style="flex: 0 0 26px;" [value]="char">  
+                <span style="font-size: 8px; position: absolute; top: 1px; left: 1px">{{getKey(char)}}</span>
+            </div>
+        </div>
+    </div>
+</div>

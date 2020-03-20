@@ -6,15 +6,28 @@
     padding: 50px;
 
     .row {
-        height: 36px; 
+        height: 32px; 
         
-        input {
+        .cell {
             text-align: center;
             text-transform: uppercase;
+            background-color: white;
+
+            &.blank {
+                background-color: black;
+            }
         }
     }
 }
 
 button.selected {
     border-color: red;
+}
+
+.input-cell {
+    text-transform: uppercase;
+    text-align: center;
+    padding: 1px;
+    height: 26px;
+    width: 26px;
 }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WebSocketService } from 'src/app/websocket.service';
 import { filter, first, map } from 'rxjs/operators';
-import { NewGameCreated, NewGame } from 'big-screen-puzzles-contract';
+import { NewGameCreated, NewGame, Cell } from 'big-screen-puzzles-contract';
 
 @Component({
   selector: 'app-codeword',
@@ -13,18 +13,10 @@ export class CodewordComponent implements OnInit {
 
   public characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-  public puzzle: string[][] = [
-    ['H', 'E', 'L', 'L', 'O'],
-    ['E', ' ', 'A', ' ', ' '],
-    ['L', ' ', 'B', ' ', ' '],
-    ['P', ' ', 'E', ' ', ' '],
-    [' ', ' ', 'L', ' ', ' ']
-  ];
-
   public key: string[] = [];
 
   public gridSize = 14;
-  public grid: string[][];
+  public grid: Array<Array<Cell>>;
 
   public selectedCharacter = '';
 
@@ -33,14 +25,6 @@ export class CodewordComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute
   ) {
-    this.grid = [];
-    for (let x = 0; x < this.gridSize; x++) {
-      this.grid.push([]);
-
-      for (let y = 0; y < this.gridSize; y++) {
-        this.grid[x][y] = '';
-      }
-    }
   }
 
   public newGame(): void {
@@ -50,46 +34,33 @@ export class CodewordComponent implements OnInit {
         first(),
         map(message => message as NewGameCreated)
       )
-      .subscribe(newGameCreated => this.router.navigate(['game', newGameCreated.gameId], { relativeTo: this.route }));
+      .subscribe(newGameCreated => {
+        console.log("[NewGameCreated]", newGameCreated);
+        this.grid = newGameCreated.game.grid;
+        this.key = newGameCreated.game.key;
+        this.router.navigate(['game', newGameCreated.game.id], { relativeTo: this.route });
+      });
 
     this.webSocketService.sendMessage(new NewGame());
   }
 
   public ngOnInit(): void {
-    this.key = this.shuffleArray();
-
     console.log(this.key);
   }
 
   public getKey(character: string): string {
-    return character ? this.key.indexOf(character).toString() : ' ';
+    return (this.key.indexOf(character) + 1).toString();
   }
 
   public selectCharacter(character: string): void {
     this.selectedCharacter = character;
   }
 
-  public getCell(rowIndex: number, columnIndex: number): string {
-    if (this.grid[rowIndex][columnIndex]) {
-      console.log(rowIndex, columnIndex, this.grid[rowIndex][columnIndex]);
-    }
-    return this.grid[rowIndex][columnIndex];
-  }
-
   public updateCell(rowIndex: number, columnIndex: number, event: string): void {
-    this.grid[rowIndex][columnIndex] = event;
+    // this.grid[rowIndex][columnIndex] = event;
     console.log(rowIndex, columnIndex, event, this.grid);
   }
 
-  private shuffleArray(): string[] {
-    const characters = [...this.characters];
-
-    for (let i = characters.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [characters[i], characters[j]] = [characters[j], characters[i]];
-    }
-
-    return characters;
-  }
+  
 
 }

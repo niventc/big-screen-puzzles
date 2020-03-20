@@ -185,7 +185,8 @@ export class WordService {
                 if (values[rand] && values[rand].words) {
                     const word = values[rand].words[0];
 
-                    if (word && word.word.match("^[a-zA-Z ]*$")) {
+                    // Exclude numbers/symbols
+                    if (word && word.word.match("^[a-zA-Z]*$")) {
                         return word.word;
                     }
                 }                
