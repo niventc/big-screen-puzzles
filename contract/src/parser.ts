@@ -1,4 +1,4 @@
-import { Message, Heartbeat, NewGame, JoinGame, ClientConnected, NewGameCreated } from './messages';
+import { Message, Heartbeat, NewGame, JoinGame, ClientConnected, NewGameCreated, JoinGameSucceeded, PlayerJoinedGame } from './messages';
 
 export class Parser {
 
@@ -22,6 +22,10 @@ export class Parser {
                 return Object.assign(new ClientConnected(), typedMessage);
             case "NewGameCreated":
                 return Object.assign(new NewGameCreated(), typedMessage);
+            case "JoinGameSucceeded":
+                return Object.assign(new JoinGameSucceeded(), typedMessage);
+            case "PlayerJoinedGame":
+                return Object.assign(new PlayerJoinedGame(), typedMessage);
 
             // Commands
             case "NewGame":

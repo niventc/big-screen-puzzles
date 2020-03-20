@@ -2,11 +2,14 @@
 
 <button (click)="newGame()">New Game</button>
 
+<input type="text" matInput [(ngModel)]="gameId" placeholder="Game Id">
+<button (click)="joinGame()">Join Game</button>
+
 <router-outlet></router-outlet>
 
-<div style="display: flex">
+<div style="display: flex" *ngIf="game">
     <div class="grid" style="flex: 1 1 500px">
-        <div class="row" *ngFor="let row of grid; index as rowIndex" style="display: flex;">
+        <div class="row" *ngFor="let row of game.grid; index as rowIndex" style="display: flex;">
             <div *ngFor="let cell of row; index as columnIndex" 
                 class="cell"
                 [ngClass]="{ 'blank': cell.isEmpty }"
@@ -33,10 +36,17 @@
 
         <h1>Key</h1>        
         <div class="row" style="display: flex; width: 416px; flex-flow: row; flex-wrap: wrap;">
-            <div *ngFor="let char of key" style="position: relative;">
+            <div *ngFor="let char of game.key" style="position: relative;">
                 <input type="text" class="input-cell" maxlength="1" style="flex: 0 0 26px;" [value]="char">  
                 <span style="font-size: 8px; position: absolute; top: 1px; left: 1px">{{getKey(char)}}</span>
             </div>
         </div>
+    </div>
+
+    <div style="flex: 1 1 auto">
+        <h1>Players</h1>
+        <ul>
+            <li *ngFor="let player of game.players">{{player}}</li>
+        </ul>
     </div>
 </div>

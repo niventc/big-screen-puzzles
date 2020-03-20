@@ -4,7 +4,7 @@ import { WebsocketRequestHandler } from 'express-ws';
 
 import { WebSocketController } from 'src/server';
 import { OpenEvent } from 'ws';
-import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game } from 'big-screen-puzzles-contract';
+import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game, PlayerJoinedGame, JoinGameSucceeded } from 'big-screen-puzzles-contract';
 import { ClientService, WebSocketClient } from 'src/client.service';
 import { WordService } from 'src/words/word.service';
 import { CodeWordService } from './codeword.service';
@@ -49,6 +49,7 @@ export class SessionController implements WebSocketController {
                 case JoinGame:
                     console.log("join game " + (<JoinGame>parsedMessaged).gameId);
 
+                    const currentPlayer = (<WebSocketClient><unknown>ws).uuid;
                     const gameId = (<JoinGame>parsedMessaged).gameId
                     const game = this.games.get(gameId);
 
@@ -56,17 +57,26 @@ export class SessionController implements WebSocketController {
                         console.error(`No game found with id ${gameId}`);
                         // TODO send error
                     } else {
-                        game.players.push((<WebSocketClient><unknown>ws).uuid);
-                        game.players.forEach(clientId => {
-                            // TODO filter current player
-                            const client = this.clientService.getClient(clientId);
-                            if (!client) {
-                                console.warn(`Unable to find client with id ${clientId}`);
-                                // TODO error/remove from game
-                            } else {
-                                ws.send("{\"message\": \"someone joined\"}");
-                            }
-                        });
+                        game.players.push(currentPlayer);
+
+                        const joinGameSucceeded = new JoinGameSucceeded();
+                        joinGameSucceeded.game = game;
+                        ws.send(JSON.stringify(joinGameSucceeded));
+
+                        const playerJoinedGame = new PlayerJoinedGame();
+                        playerJoinedGame.clientId = currentPlayer;
+                        game.players
+                            .filter(player => player !== currentPlayer)
+                            .forEach(clientId => {
+                                const client = this.clientService.getClient(clientId);
+                                if (!client) {
+                                    console.warn(`Unable to find client with id ${clientId}`);
+                                    // TODO error/remove from game
+                                } else {
+                                    console.log(`Sending to ${clientId}`, playerJoinedGame);
+                                    client.send(JSON.stringify(playerJoinedGame));
+                                }
+                            });
                     }
 
                     break;

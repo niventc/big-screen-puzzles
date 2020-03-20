@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WebSocketService } from 'src/app/websocket.service';
 import { filter, first, map } from 'rxjs/operators';
-import { NewGameCreated, NewGame, Cell } from 'big-screen-puzzles-contract';
+import { NewGameCreated, NewGame, Cell, JoinGame, Game, PlayerJoinedGame, JoinGameSucceeded } from 'big-screen-puzzles-contract';
 
 @Component({
   selector: 'app-codeword',
@@ -13,10 +13,10 @@ export class CodewordComponent implements OnInit {
 
   public characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-  public key: string[] = [];
+  public gameId: string;
 
   public gridSize = 14;
-  public grid: Array<Array<Cell>>;
+  public game: Game;
 
   public selectedCharacter = '';
 
@@ -36,8 +36,7 @@ export class CodewordComponent implements OnInit {
       )
       .subscribe(newGameCreated => {
         console.log("[NewGameCreated]", newGameCreated);
-        this.grid = newGameCreated.game.grid;
-        this.key = newGameCreated.game.key;
+        this.game = newGameCreated.game;
         this.router.navigate(['game', newGameCreated.game.id], { relativeTo: this.route });
       });
 
@@ -45,11 +44,24 @@ export class CodewordComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    console.log(this.key);
+    this.webSocketService.message$
+      .subscribe(message => {
+        if (message.type === "PlayerJoinedGame") {
+          this.game.players.push((<PlayerJoinedGame>message).clientId);
+        } else if (message.type === "JoinGameSucceeded") {
+          this.game = (<JoinGameSucceeded>message).game;
+        }
+      });
   }
 
   public getKey(character: string): string {
-    return (this.key.indexOf(character) + 1).toString();
+    return (this.game.key.indexOf(character) + 1).toString();
+  }
+
+  public joinGame(): void {
+    const joinGame = new JoinGame();
+    joinGame.gameId = this.gameId;
+    this.webSocketService.sendMessage(joinGame);
   }
 
   public selectCharacter(character: string): void {
@@ -58,7 +70,7 @@ export class CodewordComponent implements OnInit {
 
   public updateCell(rowIndex: number, columnIndex: number, event: string): void {
     // this.grid[rowIndex][columnIndex] = event;
-    console.log(rowIndex, columnIndex, event, this.grid);
+    console.log(rowIndex, columnIndex, event, this.game.grid);
   }
 
   

@@ -38,6 +38,22 @@ export class JoinGame extends Message {
     }
 }
 
+export class JoinGameSucceeded extends Message {
+    public game: Game;
+
+    constructor() {
+        super("JoinGameSucceeded");
+    }
+}
+
+export class PlayerJoinedGame extends Message {
+    public clientId: string;
+
+    constructor() {
+        super("PlayerJoinedGame");
+    }
+}
+
 export class Cell {
     public value: string;
     public key: number;

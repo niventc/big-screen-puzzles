@@ -12,7 +12,8 @@ export class ClientService {
         const webSocketClient = client as WebSocketClient;
         const uuid = uuidv4();
         webSocketClient.uuid = uuid;
-        console.log(`Added client with uuid ${uuid}`)
+        this.clients.set(uuid, webSocketClient);
+        console.log(`Added client with uuid ${uuid}`);
         return uuid;
     }
 
