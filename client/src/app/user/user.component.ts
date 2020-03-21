@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { WebSocketService } from '../websocket.service';
 import { filter, map } from 'rxjs/operators';
-import { ClientConnected } from 'big-screen-puzzles-contract';
+import { PlayerConnected, Player, SetPlayerName } from 'big-screen-puzzles-contract';
+import { UserService } from './user.service';
 
 @Component({
   selector: 'app-user',
@@ -10,12 +11,15 @@ import { ClientConnected } from 'big-screen-puzzles-contract';
 })
 export class UserComponent implements OnInit {
 
-  public clientId: string;
+  public player: Player = <any>{};
   public isConnected: boolean;
 
   constructor(
-    private webSocketService: WebSocketService
-  ) { }
+    private webSocketService: WebSocketService,
+    private userService: UserService
+  ) { 
+
+  }
 
   public ngOnInit(): void {
     this.webSocketService.connected$
@@ -23,10 +27,19 @@ export class UserComponent implements OnInit {
 
     this.webSocketService.message$
       .pipe(
-        filter(message => message.type === "ClientConnected"),
-        map(message => message as ClientConnected)
+        filter(message => message.type === "PlayerConnected"),
+        map(message => message as PlayerConnected)
       )
-      .subscribe(client => this.clientId = client.clientId);
+      .subscribe(playerConnected => {
+        this.userService.setClientId(playerConnected.player.id);
+        this.player = playerConnected.player;
+      });
+  }
+
+  public changeName(): void {
+    const changePlayerName = new SetPlayerName();
+    changePlayerName.name = this.player.name;
+    this.webSocketService.sendMessage(changePlayerName);
   }
 
 }

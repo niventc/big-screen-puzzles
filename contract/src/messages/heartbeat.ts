@@ -1,4 +1,6 @@
 import { Message } from './message';
+import { Game } from '../codeword';
+import { Player } from '../player';
 
 export class Heartbeat extends Message {    
     constructor() {
@@ -7,11 +9,20 @@ export class Heartbeat extends Message {
 }
 
 /* Events */
-export class ClientConnected extends Message {
-    public clientId: string;
+export class PlayerConnected extends Message {
+    public player: Player;
 
     constructor() {
-        super("ClientConnected");
+        super("PlayerConnected");
+    }
+}
+
+export class PlayerNameChanged extends Message {
+    public clientId: string;
+    public name: string;
+
+    constructor() {
+        super("PlayerNameChanged");
     }
 }
 
@@ -32,7 +43,7 @@ export class JoinGameSucceeded extends Message {
 }
 
 export class PlayerJoinedGame extends Message {
-    public clientId: string;
+    public player: Player;
 
     constructor() {
         super("PlayerJoinedGame");
@@ -43,7 +54,7 @@ export class CellFilled extends Message {
     public x: number;
     public y: number;
     public value: string;
-    public byPlayer: string;
+    public byPlayer: Player;
 
     constructor() {
         super("CellFilled");
@@ -53,7 +64,7 @@ export class CellFilled extends Message {
 export class KeyFilled extends Message {
     public key: number;
     public value: string;
-    public byPlayer: string;
+    public byPlayer: Player;
 
     constructor() {
         super("KeyFilled");
@@ -61,6 +72,14 @@ export class KeyFilled extends Message {
 }
 
 /* Commands */
+export class SetPlayerName extends Message {
+    public name: string;
+
+    constructor() {
+        super("SetPlayerName");
+    }
+}
+
 export class NewGame extends Message {
     public width: number;
     public height: number;
@@ -97,41 +116,4 @@ export class FillCell extends Message {
     constructor() {
         super("FillCell");
     }
-}
-
-export class Key {
-    public value: string;
-    public key: number;
-    public playerValue: string;
-}
-
-export class Cell {
-    public value: string;
-    public key: number;
-    public playerValue: string;
-    
-    public isEmpty: boolean;
-    public isSolved = false;
-
-    public static EmptyCell(): Cell {
-        const cell = new Cell();
-        cell.isEmpty = true;
-        return cell;
-    }
-
-    public setValue(value: string, key: Array<Key>): void {
-        if (this.value && value != this.value) {
-            throw new Error(`Cannot set cell value to ${value} as value is already set with ${this.value}`);
-        }
-        this.value = value;
-        this.key = key.find(k => k.value === value).key;
-        this.isEmpty = false;
-    }
-}
-
-export interface Game {
-    id: string;
-    grid: Array<Array<Cell>>;
-    players: Array<string>;
-    key: Array<Key>;
 }

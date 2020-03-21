@@ -4,7 +4,7 @@ import { WebsocketRequestHandler } from 'express-ws';
 
 import { WebSocketController } from 'src/server';
 import { OpenEvent } from 'ws';
-import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game, PlayerJoinedGame, JoinGameSucceeded, FillCell, CellFilled, FillKey, KeyFilled } from 'big-screen-puzzles-contract';
+import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game, PlayerJoinedGame, JoinGameSucceeded, FillCell, CellFilled, FillKey, KeyFilled, SetPlayerName, PlayerNameChanged } from 'big-screen-puzzles-contract';
 import { ClientService, WebSocketClient } from 'src/client.service';
 import { WordService } from 'src/words/word.service';
 import { CodeWordService } from './codeword.service';
@@ -47,6 +47,12 @@ export class SessionController implements WebSocketController {
                     // console.log("heartbeat");
                     break;
 
+                case SetPlayerName:
+                    const setPlayerName = parsedMessaged as SetPlayerName;
+                    console.log("set player name", setPlayerName);
+                    this.setPlayerName(setPlayerName, <WebSocketClient><unknown>ws);
+                    break;
+
                 case JoinGame:
                     const joinGame = parsedMessaged as JoinGame;
                     console.log("join game", joinGame);
@@ -83,17 +89,47 @@ export class SessionController implements WebSocketController {
         ].join("-").toLowerCase();
     }
 
+    private setPlayerName(message: SetPlayerName, ws: WebSocketClient): void {
+        this.clientService.setPlayerName(ws.uuid, message.name);
+
+        // Update all games the player is in, and notify other players
+        Array.from(this.games.values())
+            .filter(game => game.players.find(player => player.id === ws.uuid) !== null)
+            .forEach(game => {
+                let gamePlayer = game.players.find(player => player.id === ws.uuid);
+                gamePlayer.name = message.name;
+
+                const playerNameChanged = new PlayerNameChanged();
+                playerNameChanged.clientId = ws.uuid;
+                playerNameChanged.name = message.name;
+                game.players
+                    .filter(player => player.id !== ws.uuid)
+                    .forEach(player => {
+                        const client = this.clientService.getClient(player.id);
+                        if (!client) {
+                            console.warn(`Unable to find client with id ${player.id}`);
+                            // TODO error/remove from game
+                        } else {
+                            console.log(`Sending to ${player.id}`, playerNameChanged);
+                            client.send(JSON.stringify(playerNameChanged));
+                        }
+                    });
+            });
+    }
+
     private newGame(newGame: NewGame, ws: WebSocketClient): void {
         const id = this.generateGameId();
         const key = this.codeWordService.generateKey();
         const grid = this.codeWordService.generateGrid(newGame.width, newGame.height, key);
+        const player = this.clientService.getPlayer(ws.uuid);
         const game = <Game>{
             id: id,
             grid: grid,
             players: [
-                ws.uuid
+                player
             ],
-            key: key
+            key: key,
+            startedAt: new Date(Date.now())
         };
         this.games.set(id, game);
         const newGameCreated = new NewGameCreated();
@@ -102,7 +138,7 @@ export class SessionController implements WebSocketController {
     }
 
     private joinGame(message: JoinGame, ws: WebSocketClient): void {
-        const currentPlayer = ws.uuid;
+        const currentPlayer = this.clientService.getPlayer(ws.uuid);
         const gameId = message.gameId
         const game = this.games.get(gameId);
 
@@ -119,16 +155,16 @@ export class SessionController implements WebSocketController {
         ws.send(JSON.stringify(joinGameSucceeded));
 
         const playerJoinedGame = new PlayerJoinedGame();
-        playerJoinedGame.clientId = currentPlayer;
+        playerJoinedGame.player = currentPlayer;
         game.players
             .filter(player => player !== currentPlayer)
-            .forEach(clientId => {
-                const client = this.clientService.getClient(clientId);
+            .forEach(player => {
+                const client = this.clientService.getClient(player.id);
                 if (!client) {
-                    console.warn(`Unable to find client with id ${clientId}`);
+                    console.warn(`Unable to find client with id ${player.id}`);
                     // TODO error/remove from game
                 } else {
-                    console.log(`Sending to ${clientId}`, playerJoinedGame);
+                    console.log(`Sending to ${player.id}`, playerJoinedGame);
                     client.send(JSON.stringify(playerJoinedGame));
                 }
             });
@@ -145,21 +181,22 @@ export class SessionController implements WebSocketController {
 
         game.grid[message.x][message.y].playerValue = message.value;
 
+        const player = this.clientService.getPlayer(clientId);
         const cellFilled = new CellFilled();
         cellFilled.x = message.x;
         cellFilled.y = message.y;
         cellFilled.value = message.value;
-        cellFilled.byPlayer = clientId;
+        cellFilled.byPlayer = player;
         
         game.players
-            .filter(player => player !== clientId)
-            .forEach(clientId => {
-                const client = this.clientService.getClient(clientId);
+            .filter(player => player.id !== clientId)
+            .forEach(player => {
+                const client = this.clientService.getClient(player.id);
                 if (!client) {
-                    console.warn(`Unable to find client with id ${clientId}`);
+                    console.warn(`Unable to find client with id ${player.id}`);
                     // TODO error/remove from game
                 } else {
-                    console.log(`Sending to ${clientId}`, cellFilled);
+                    console.log(`Sending to ${player.id}`, cellFilled);
                     client.send(JSON.stringify(cellFilled));
                 }
             });        
@@ -176,20 +213,21 @@ export class SessionController implements WebSocketController {
 
         game.key.find(k => k.key === message.key).playerValue = message.value;
 
+        const player = this.clientService.getPlayer(clientId);
         const keyFilled = new KeyFilled();
         keyFilled.key = message.key;
         keyFilled.value = message.value;
-        keyFilled.byPlayer = clientId;
+        keyFilled.byPlayer = player;
         
         game.players
-            .filter(player => player !== clientId)
-            .forEach(clientId => {
-                const client = this.clientService.getClient(clientId);
+            .filter(player => player.id !== clientId)
+            .forEach(player => {
+                const client = this.clientService.getClient(player.id);
                 if (!client) {
-                    console.warn(`Unable to find client with id ${clientId}`);
+                    console.warn(`Unable to find client with id ${player.id}`);
                     // TODO error/remove from game
                 } else {
-                    console.log(`Sending to ${clientId}`, keyFilled);
+                    console.log(`Sending to ${player.id}`, keyFilled);
                     client.send(JSON.stringify(keyFilled));
                 }
             });        

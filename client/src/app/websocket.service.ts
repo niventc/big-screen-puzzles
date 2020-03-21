@@ -5,6 +5,7 @@ import { map, retryWhen, tap, delay } from 'rxjs/operators';
 import { Heartbeat, Message, Parser } from 'big-screen-puzzles-contract';
 
 import { environment } from './../environments/environment';
+import { UserService } from './user/user.service';
 
 @Injectable()
 export class WebSocketService {
@@ -13,8 +14,16 @@ export class WebSocketService {
   public readonly message$: Observable<Message>;
   public readonly connected$ = new Subject<boolean>();
 
-  constructor() {
-    this.socket$ = webSocket(`${environment.serverUrl}/api/sessions`);
+  constructor(
+    userService: UserService
+  ) {
+    let serverUrl = `${environment.serverUrl}/api/sessions`;
+    const clientId = userService.getClientId();
+    if (clientId) {
+      serverUrl += `?clientId=${clientId}`;
+    }
+
+    this.socket$ = webSocket(serverUrl);
     
     interval(1000).subscribe(() => this.socket$.next(new Heartbeat()));
 

@@ -8,6 +8,8 @@ import { SessionsModule } from './sessions/sessions.module';
 import { HomeComponent } from './home/home.component';
 import { WebSocketService } from './websocket.service';
 import { UserComponent } from './user/user.component';
+import { UserService } from './user/user.service';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -18,11 +20,13 @@ import { UserComponent } from './user/user.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
+    FormsModule,
     CodewordModule,
     SessionsModule
   ],
   providers: [
-    WebSocketService
+    WebSocketService,
+    UserService
   ],
   bootstrap: [AppComponent]
 })

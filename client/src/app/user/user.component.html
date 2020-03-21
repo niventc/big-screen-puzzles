@@ -1,4 +1,6 @@
 <div id="client-status">
-    ClientId: {{clientId}}
-    <span id="circle" [ngClass]="{ 'connected': isConnected }"></span>
+    <form (ngSubmit)="changeName()">
+        Welcome <input type="text" name="playerName" matInput [(ngModel)]="player.name" placeholder="Player (set name)">!
+        <span id="circle" [ngClass]="{ 'connected': isConnected }"></span>
+    </form>
 </div>

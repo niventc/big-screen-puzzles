@@ -1,11 +1,12 @@
 import * as express from 'express';
 import * as expressWs from 'express-ws';
+import * as http from 'http';
 
 import { WordController } from './words/word.controller';
 import { WordService } from './words/word.service';
 import { SessionController } from './sessions/session.controller';
 import { ClientService } from './client.service';
-import { ClientConnected } from 'big-screen-puzzles-contract';
+import { PlayerConnected } from 'big-screen-puzzles-contract';
 
 export interface Controller {
     router: express.Router;
@@ -45,12 +46,13 @@ class Server {
         });
 
         const wss = this.wsInstance.getWss();
-        wss.on('connection', (ws: WebSocket, req, client) => {
-            const uuid = clientService.addClient(ws);
+        wss.on('connection', (ws: WebSocket, req: http.IncomingMessage) => {
+            const clientId = (<any>req).query['clientId'];
+            const player = clientService.addClient(ws, clientId);
 
-            const clientConnected = new ClientConnected();
-            clientConnected.clientId = uuid;
-            ws.send(JSON.stringify(clientConnected));
+            const playerConnected = new PlayerConnected();
+            playerConnected.player = player;
+            ws.send(JSON.stringify(playerConnected));
 
             ws.onopen = (e) => {
                 // console.log(e);

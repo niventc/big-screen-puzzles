@@ -55,21 +55,21 @@ export class CodewordComponent implements OnInit {
     this.webSocketService.message$
       .subscribe(message => {
         if (message.type === "PlayerJoinedGame") {
-          this.game.players.push((<PlayerJoinedGame>message).clientId);
+          this.game.players.push((<PlayerJoinedGame>message).player);
 
-          this.events.unshift(`Player ${(<PlayerJoinedGame>message).clientId} joined the game!`);
+          this.events.unshift(`Player ${(<PlayerJoinedGame>message).player.name} joined the game!`);
         } else if (message.type === "JoinGameSucceeded") {
           this.game = (<JoinGameSucceeded>message).game;
         } else if (message.type === "CellFilled") {
           const cellFilled = message as CellFilled;
           this.game.grid[cellFilled.x][cellFilled.y].playerValue = cellFilled.value;
 
-          this.events.unshift(`Player ${cellFilled.byPlayer} filled ${cellFilled.x},${cellFilled.y} with ${cellFilled.value}!`);
+          this.events.unshift(`Player ${cellFilled.byPlayer.name} filled ${cellFilled.x},${cellFilled.y} with ${cellFilled.value}!`);
         } else if (message.type === "KeyFilled") {
           const keyFilled = message as KeyFilled;
           this.game.key.find(k => k.key === keyFilled.key).playerValue = keyFilled.value;
 
-          this.events.unshift(`Player ${keyFilled.byPlayer} thinks ${keyFilled.key} is ${keyFilled.value}!`);
+          this.events.unshift(`Player ${keyFilled.byPlayer.name} thinks ${keyFilled.key} is ${keyFilled.value}!`);
         }
       });
   }

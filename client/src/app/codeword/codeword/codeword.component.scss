@@ -1,5 +1,12 @@
-:host {
-    padding: 10px;
+#title {
+    padding: 6px;
+
+    h1 {
+        color: white;
+        font-family: 'terminal', 'consolas';
+        font-size: 3em;
+        margin: 0;
+    }
 }
 
 .grid {
@@ -30,4 +37,12 @@ button.selected {
     padding: 1px;
     height: 26px;
     width: 26px;
+}
+
+.well {
+    background-color: #222;
+    color: white;
+    padding: 16px;
+    border-radius: 24px;
+    display: inline-block;
 }

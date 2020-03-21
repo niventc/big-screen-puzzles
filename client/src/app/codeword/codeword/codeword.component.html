@@ -1,15 +1,22 @@
-<h2>codeword</h2>
+<div id="title">
+    <h1>
+        big-screen-puzzles / codeword
+    </h1>
+</div>
 
-<input type="number" matInput [(ngModel)]="width" placeholder="Width">
-<input type="number" matInput [(ngModel)]="height" placeholder="Height">
-<button (click)="newGame()">New Game</button>
+<div class="well">
+    <input type="number" matInput [(ngModel)]="width" placeholder="Width">
+    x
+    <input type="number" matInput [(ngModel)]="height" placeholder="Height">
+    <button (click)="newGame()">Start New Game</button>
+</div>
 
-<input type="text" matInput [(ngModel)]="gameId" placeholder="Game Id">
-<button (click)="joinGame()">Join Game</button>
+<div class="well">
+    <input type="text" matInput [(ngModel)]="gameId" placeholder="Game Id">
+    <button (click)="joinGame()">Join Game</button>
+</div>
 
 <router-outlet></router-outlet>
-
-<button (click)="reveal = !reveal">Toggle Reveal</button>
 
 <div style="display: flex" *ngIf="game">
     <div class="grid" [ngStyle]="{ 'width': (width * 32) + 'px' }">
@@ -27,8 +34,9 @@
         </div>
     </div>
 
-    <div style="flex: 1 1 auto">
-        <h1>Control</h1>    
+    <div style="flex: 1 1 auto; color: white">
+        <h1>Control</h1>
+        <button (click)="reveal = !reveal">Toggle Reveal</button>
         <div class="row" style="display: flex; width: 416px; flex-flow: row; flex-wrap: wrap;">
             <button style="flex: 0 0 32px; height: 32px" 
                     *ngFor="let char of characters" 
@@ -49,10 +57,10 @@
         </div>
     </div>
 
-    <div style="flex: 1 1 auto">
+    <div style="flex: 1 1 auto; color: white">
         <h1>Players</h1>
         <ul>
-            <li *ngFor="let player of game.players">{{player}}</li>
+            <li *ngFor="let player of game.players">{{player.name}}</li>
         </ul>
 
         <h1>Events</h1>

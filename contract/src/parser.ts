@@ -1,4 +1,4 @@
-import { Message, Heartbeat, NewGame, JoinGame, ClientConnected, NewGameCreated, JoinGameSucceeded, PlayerJoinedGame, FillCell, CellFilled, KeyFilled, FillKey } from './messages';
+import { Message, Heartbeat, NewGame, JoinGame, PlayerConnected, NewGameCreated, JoinGameSucceeded, PlayerJoinedGame, FillCell, CellFilled, KeyFilled, FillKey, PlayerNameChanged, SetPlayerName } from './messages';
 
 export class Parser {
 
@@ -18,8 +18,10 @@ export class Parser {
                 return Object.assign(new Heartbeat(), typedMessage);
 
             // Events
-            case "ClientConnected":
-                return Object.assign(new ClientConnected(), typedMessage);
+            case "PlayerConnected":
+                return Object.assign(new PlayerConnected(), typedMessage);
+            case "PlayerNameChanged":
+                return Object.assign(new PlayerNameChanged(), typedMessage);
             case "NewGameCreated":
                 return Object.assign(new NewGameCreated(), typedMessage);
             case "JoinGameSucceeded":
@@ -32,6 +34,8 @@ export class Parser {
                 return Object.assign(new KeyFilled(), typedMessage);
 
             // Commands
+            case "SetPlayerName":
+                return Object.assign(new SetPlayerName(), typedMessage);
             case "NewGame":
                 return Object.assign(new NewGame(), typedMessage);
             case "JoinGame":
