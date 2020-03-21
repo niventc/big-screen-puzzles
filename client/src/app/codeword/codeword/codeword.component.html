@@ -1,5 +1,7 @@
 <h2>codeword</h2>
 
+<input type="number" matInput [(ngModel)]="width" placeholder="Width">
+<input type="number" matInput [(ngModel)]="height" placeholder="Height">
 <button (click)="newGame()">New Game</button>
 
 <input type="text" matInput [(ngModel)]="gameId" placeholder="Game Id">
@@ -7,16 +9,18 @@
 
 <router-outlet></router-outlet>
 
+<button (click)="reveal = !reveal">Toggle Reveal</button>
+
 <div style="display: flex" *ngIf="game">
-    <div class="grid" style="flex: 1 1 500px">
-        <div class="row" *ngFor="let row of game.grid; index as rowIndex" style="display: flex;">
+    <div class="grid" [ngStyle]="{ 'width': (width * 32) + 'px' }">
+        <div class="row" *ngFor="let row of game.grid; index as rowIndex" style="display: flex; width: 100%">
             <div *ngFor="let cell of row; index as columnIndex" 
                 class="cell"
                 [ngClass]="{ 'blank': cell.isEmpty }"
                 style="flex: 0 0 32px; position: relative;"
                 (click)="updateCell(rowIndex, columnIndex, selectedCharacter)">
                     <ng-container *ngIf="!cell.isEmpty">
-                        <input type="text" class="input-cell" maxlength="1" [value]="cell.value ">  
+                        <input type="text" class="input-cell" maxlength="1" [value]="reveal ? cell.value : (cell.playerValue ? cell.playerValue : '')">  
                         <span style="font-size: 8px; position: absolute; top: 1px; left: 1px">{{cell.key}}</span>   
                     </ng-container>
             </div>
@@ -36,9 +40,11 @@
 
         <h1>Key</h1>        
         <div class="row" style="display: flex; width: 416px; flex-flow: row; flex-wrap: wrap;">
-            <div *ngFor="let char of game.key" style="position: relative;">
-                <input type="text" class="input-cell" maxlength="1" style="flex: 0 0 26px;" [value]="char">  
-                <span style="font-size: 8px; position: absolute; top: 1px; left: 1px">{{getKey(char)}}</span>
+            <div *ngFor="let key of game.key" 
+                 style="position: relative;"
+                 (click)="updateKey(key, selectedCharacter)">
+                <input type="text" class="input-cell" maxlength="1" style="flex: 0 0 26px;" [value]="reveal ? key.value : (key.playerValue ? key.playerValue: '')">  
+                <span style="font-size: 8px; position: absolute; top: 1px; left: 1px">{{key.key}}</span>
             </div>
         </div>
     </div>
@@ -47,6 +53,13 @@
         <h1>Players</h1>
         <ul>
             <li *ngFor="let player of game.players">{{player}}</li>
+        </ul>
+
+        <h1>Events</h1>
+        <ul>
+            <li *ngFor="let event of events">
+                {{event}}
+            </li>
         </ul>
     </div>
 </div>

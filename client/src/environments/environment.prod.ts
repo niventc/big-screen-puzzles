@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  production: true,
+  serverUrl: 'wss://big-screen-puzzles-server.azurewebsites.net'
 };

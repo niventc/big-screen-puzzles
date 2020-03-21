@@ -1,5 +1,5 @@
 import { WordService } from 'src/words/word.service';
-import { Cell } from 'big-screen-puzzles-contract';
+import { Cell, Key } from 'big-screen-puzzles-contract';
 
 export class CodeWordService {
 
@@ -36,7 +36,7 @@ export class CodeWordService {
         return missingCharacters.length > 0 ? [`[${missingCharacters.join('')}]`] : ['[a-z]'];
     }
 
-    public generateKey(): string[] {        
+    public generateKey(): Array<Key> {        
         const characters = [...this.characters];
     
         for (let i = characters.length - 1; i > 0; i--) {
@@ -44,22 +44,26 @@ export class CodeWordService {
           [characters[i], characters[j]] = [characters[j], characters[i]];
         }
     
-        return characters;
+        return characters.map((value, index) => {
+            const key = new Key();
+            key.value = value;
+            key.key = index + 1;
+            return key;
+        });
     }
 
-    public generateGrid(key: Array<string>): Array<Array<Cell>> {
+    public generateGrid(width: number, height: number, key: Array<Key>): Array<Array<Cell>> {
         let grid: Array<Array<Cell>>;
         let fullHouse = false;
         while (!fullHouse) {
             let start = new Date().getTime();
             this.words = [];
 
-            const gridSize = 15;
             grid = [];
 
             let index = 0;
-            while (index < gridSize) {
-                grid[index] = new Array<Cell>(gridSize);
+            while (index < height) {
+                grid[index] = new Array<Cell>(width);
                 for(let v = 0; v < grid[index].length; v++) {
                     grid[index][v] = Cell.EmptyCell();
                 } 
@@ -67,18 +71,17 @@ export class CodeWordService {
             }
 
             // Do columns
-            // let words = new Array<string>();
             let columnIndices = new Array<number>();
             let columnIndex = 0;
-            const midPoint = Math.round(gridSize / 2) - 1;
-            while(columnIndex <= midPoint) {
+            // const midPoint = Math.round(width / 2) - 1;
+            while(columnIndex < width) {
                 columnIndices.push(columnIndex);
                 // console.log(`doing column ${columnIndex} of ${midPoint}`);
                 let column = [];
 
                 let x = 0;
                 let y = columnIndex;
-                let remaining = gridSize;
+                let remaining = height;
                 let first = true;
                 while (remaining > 3) {
                     
@@ -121,39 +124,38 @@ export class CodeWordService {
                 }
                 column.push(remaining);
 
-                // Mirror column
-                if (columnIndex < midPoint) {
-                    let mirrored = column.reverse();
-                    x = 0;
-                    y = gridSize - 1 - columnIndex;
-                    columnIndices.push(y);
-                    mirrored.forEach(length => {
-                        if (typeof length === "number") {
-                            // console.log(`adding mirror gap ${length}`);
-                            x = x + length;
-                        } else {
-                            let nextWord = this.getRandomWordMatching(this.missingPattern, length.length);
-                            if (nextWord) {
-                                // console.log(`adding mirror word ${nextWord}`);
-                                for (const letter of nextWord) {
-                                    grid[x++][y].setValue(letter, key);
-                                }
-                                this.words.push(nextWord);
-                            }
-                        }
-                    });
-                }
+                // // Mirror column
+                // if (columnIndex < midPoint) {
+                //     let mirrored = column.reverse();
+                //     x = 0;
+                //     y = width - 1 - columnIndex;
+                //     columnIndices.push(y);
+                //     mirrored.forEach(length => {
+                //         if (typeof length === "number") {
+                //             // console.log(`adding mirror gap ${length}`);
+                //             x = x + length;
+                //         } else {
+                //             let nextWord = this.getRandomWordMatching(this.missingPattern, length.length);
+                //             if (nextWord) {
+                //                 // console.log(`adding mirror word ${nextWord}`);
+                //                 for (const letter of nextWord) {
+                //                     grid[x++][y].setValue(letter, key);
+                //                 }
+                //                 this.words.push(nextWord);
+                //             }
+                //         }
+                //     });
+                // }
 
                 columnIndex += 2;
             }
 
             // Let's build out some horizontals
             const sortedColumns = columnIndices.sort((a, b) => a - b);
-            // console.log("columns " + sortedColumns.join("|"));
             sortedColumns.forEach(column => {
                 let x = 0;
                 let y = column;
-                while (x < gridSize) {
+                while (x < height) {
                     const hoz = this.hasRoomForHorizontal(x, y, grid, []);
 
                     if (hoz.length >= 3) {
@@ -210,17 +212,18 @@ export class CodeWordService {
     }
 
     private hasRoomForHorizontal(x: number, y: number, grid: Array<Array<Cell>>, chars: string[]): string[] {
-        if (x > grid.length || y > grid.length) {
+        if (x >= grid.length || y > grid[0].length) {
             return chars;
         }
 
+        // console.log(x, y, grid.length, grid[0].length);
         const cell = grid[x][y] ? grid[x][y] : undefined;        
-        const cellAbove = x > 0 && y < grid.length ? grid[x - 1][y] : undefined;
-        const cellBelow = x + 1 >= grid.length || y >= grid.length ? undefined : grid[x + 1][y];
+        const cellAbove = x > 0 && y < grid[0].length ? grid[x - 1][y] : undefined;
+        const cellBelow = x + 1 >= grid.length || y >= grid[0].length ? undefined : grid[x + 1][y];
         const cellBefore = y > 0 ? grid[x][y-1] : undefined;
-        const nextCell = y + 1 >= grid.length ? undefined : grid[x][y + 1];
+        const nextCell = y + 1 >= grid[0].length ? undefined : grid[x][y + 1];
         const nextCellAndAbove = y < 1 || x + 1 >= grid.length ? undefined : grid[x + 1][y - 1];
-        const nextCellAndBelow = y + 1 >= grid.length || x + 1 >= grid.length ? undefined : grid[x + 1][y + 1];
+        const nextCellAndBelow = y + 1 >= grid[0].length || x + 1 >= grid.length ? undefined : grid[x + 1][y + 1];
         
         if (!cell) return chars; // We've gone off grid, somehow...
         else {

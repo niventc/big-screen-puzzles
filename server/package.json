@@ -2,12 +2,10 @@
   "name": "big-screen-puzzles-server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "build": "tsc -w",
-    "serve": "node dist/server.js",
     "start": "ts-node-dev ./src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "package": "npx webpack"
   },
   "author": "",
   "license": "ISC",
@@ -15,9 +13,14 @@
     "@types/express": "^4.17.1",
     "@types/express-ws": "^3.0.0",
     "@types/uuid": "^7.0.0",
+    "copy-webpack-plugin": "^5.1.1",
+    "file-loader": "^6.0.0",
+    "ts-loader": "^6.2.1",
     "ts-node-dev": "^1.0.0-pre.44",
     "tslib": "^1.11.1",
-    "typescript": "^3.6.4"
+    "typescript": "^3.6.4",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11"
   },
   "dependencies": {
     "big-screen-puzzles-contract": "file:../contract",

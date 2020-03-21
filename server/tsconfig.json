@@ -3,7 +3,7 @@
     "compilerOptions": {
       "baseUrl": "./",
       "outDir": "./dist",
-      "sourceMap": true,
+      "sourceMap": false,
       "declaration": false,
       "downlevelIteration": true,
       "experimentalDecorators": true,
@@ -12,13 +12,17 @@
       "importHelpers": true,
       "target": "es2015",
       "typeRoots": [
-        "node_modules/@types"
+        "node_modules/@types",
+        "./src/words/wn3.1.dict/module.d.ts"
       ],
       "lib": [
         "es2018",
         "dom"
       ]
     },
+    "exclude": [
+      "src/words/wn3.1.dict/**/*"
+    ],
     "angularCompilerOptions": {
       "fullTemplateTypeCheck": true,
       "strictInjectionParameters": true

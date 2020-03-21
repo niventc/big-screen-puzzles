@@ -128,8 +128,8 @@ export class WordService {
     public totalSize = 0;
 
     constructor() {
-        this.types.forEach(type => {       
-            const indexPath = `./src/words/wn3.1.dict/dict/index.${type}`;     
+        this.types.forEach(type => {
+            const indexPath = `assets/wn3.1.dict/dict/index.${type}`;     
             this.readFile(indexPath, 
                 (line) => {
                     const result = this.parseIndexLine(line);
@@ -141,7 +141,7 @@ export class WordService {
                     console.log(`Read ${this.indices.length} rows from ${indexPath}`);
                 });    
 
-            const dataPath = `./src/words/wn3.1.dict/dict/data.${type}`; 
+            const dataPath = `assets/wn3.1.dict/dict/data.${type}`; 
             const dataRows = [];    
             this.readFile(dataPath, 
                 (line) => {
@@ -159,14 +159,14 @@ export class WordService {
         });
     }
 
-    public findWord(word: string): string {
+    public findWord(search: string): string {
         for (const [_, values] of this.data) {
-            const word = values.find(x => x.words.find(w => w.word === word) !== undefined);
+            const word = values.find(x => x.words.find(w => w.word === search) !== undefined);
             if (word) {
                 return word.gloss;
             }
         }
-        return `Unable to find '${word}'`;
+        return `Unable to find '${search}'`;
     }
 
     public getRandomWord(type?: WordType): string {

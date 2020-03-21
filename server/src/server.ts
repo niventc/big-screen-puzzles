@@ -1,6 +1,5 @@
 import * as express from 'express';
 import * as expressWs from 'express-ws';
-import { v4 as uuidv4 } from 'uuid';
 
 import { WordController } from './words/word.controller';
 import { WordService } from './words/word.service';
@@ -71,7 +70,7 @@ class Server {
 
     public listen(): void {
         this.app.listen(this.port, () => {
-            console.log('Listening on port 3000');
+            console.log(`Listening on port ${this.port}`);
         });
     }
 }
@@ -82,5 +81,5 @@ new Server(
     clientService,
     [new WordController(wordService)], 
     [new SessionController(clientService, wordService)], 
-    3000
+    process.env.PORT ? parseInt(process.env.PORT) : 3000
 ).listen();
