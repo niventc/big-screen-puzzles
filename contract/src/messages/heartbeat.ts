@@ -1,6 +1,7 @@
 import { Message } from './message';
-import { Game } from '../codeword';
+import { CodewordGame } from '../codeword';
 import { Player } from '../player';
+import { Game } from '../game';
 
 export class Heartbeat extends Message {    
     constructor() {
@@ -17,12 +18,11 @@ export class PlayerConnected extends Message {
     }
 }
 
-export class PlayerNameChanged extends Message {
-    public clientId: string;
-    public name: string;
+export class PlayerUpdated extends Message {
+    public player: Player;
 
     constructor() {
-        super("PlayerNameChanged");
+        super("PlayerUpdated");
     }
 }
 
@@ -71,12 +71,22 @@ export class KeyFilled extends Message {
     }
 }
 
-/* Commands */
-export class SetPlayerName extends Message {
-    public name: string;
+export class WordHighlighted extends Message {
+    public word: string;
+    public byPlayer: Player;
 
     constructor() {
-        super("SetPlayerName");
+        super("WordHighlighted");
+    }
+}
+
+/* Commands */
+export class UpdatePlayer extends Message {
+    public name?: string;
+    public colour?: string;
+
+    constructor() {
+        super("UpdatePlayer");
     }
 }
 
@@ -115,5 +125,14 @@ export class FillCell extends Message {
 
     constructor() {
         super("FillCell");
+    }
+}
+
+export class HighlightWord extends Message {
+    public gameId: string;
+    public word: string;
+
+    constructor() {
+        super("HighlightWord");
     }
 }

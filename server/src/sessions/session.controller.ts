@@ -3,11 +3,11 @@ import { Router } from 'express-ws';
 import { WebsocketRequestHandler } from 'express-ws';
 
 import { WebSocketController } from 'src/server';
-import { OpenEvent } from 'ws';
-import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game, PlayerJoinedGame, JoinGameSucceeded, FillCell, CellFilled, FillKey, KeyFilled, SetPlayerName, PlayerNameChanged } from 'big-screen-puzzles-contract';
+import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game, PlayerJoinedGame, JoinGameSucceeded, FillCell, CellFilled, FillKey, KeyFilled, UpdatePlayer, PlayerUpdated, HighlightWord, WordHighlighted, NewMinesweeperGame, MinesweeperGameCreated, SelectMinesweeperCell, MinesweeperCellSelected, MinesweeperGame, CodewordGame, Message } from 'big-screen-puzzles-contract';
 import { ClientService, WebSocketClient } from 'src/client.service';
 import { WordService } from 'src/words/word.service';
 import { CodeWordService } from './codeword.service';
+import { MinesweeperService } from './minesweeper.service';
 
 export class SessionController implements WebSocketController {
 
@@ -16,12 +16,14 @@ export class SessionController implements WebSocketController {
     private games = new Map<string, Game>();
 
     private codeWordService: CodeWordService;
+    private minesweeperService: MinesweeperService;
 
     constructor(
         private clientService: ClientService,
-        private wordService: WordService
+        wordService: WordService
     ) {
         this.codeWordService = new CodeWordService(wordService);
+        this.minesweeperService = new MinesweeperService();
     }
 
     public setup(router: Router): void {
@@ -29,8 +31,6 @@ export class SessionController implements WebSocketController {
     }
 
     public onWebSocket: WebsocketRequestHandler = (ws, req, next) => {
-        // console.log("req", req);
-
         ws.on('open', (x, y) => {
             console.log("open");
         });
@@ -47,10 +47,10 @@ export class SessionController implements WebSocketController {
                     // console.log("heartbeat");
                     break;
 
-                case SetPlayerName:
-                    const setPlayerName = parsedMessaged as SetPlayerName;
-                    console.log("set player name", setPlayerName);
-                    this.setPlayerName(setPlayerName, <WebSocketClient><unknown>ws);
+                case UpdatePlayer:
+                    const updatePlayer = parsedMessaged as UpdatePlayer;
+                    console.log("update player", updatePlayer);
+                    this.updatePlayer(updatePlayer, <WebSocketClient><unknown>ws);
                     break;
 
                 case JoinGame:
@@ -58,6 +58,22 @@ export class SessionController implements WebSocketController {
                     console.log("join game", joinGame);
                     this.joinGame(joinGame, <WebSocketClient><unknown>ws);
                     break;
+
+                // Minesweeper
+                case NewMinesweeperGame:
+                    const newMinesweeperGame = parsedMessaged as NewMinesweeperGame;
+                    console.log("new minesweeper game", newMinesweeperGame);
+                    this.newMinesweeperGame(newMinesweeperGame, <WebSocketClient><unknown>ws);
+                    break;
+
+                case SelectMinesweeperCell:
+                    const selectMinesweeperCell = parsedMessaged as SelectMinesweeperCell;
+                    console.log("select minesweeper cell", selectMinesweeperCell);
+                    this.selectMinesweeperCell(selectMinesweeperCell, <WebSocketClient><unknown>ws);
+                    break;
+
+
+                // Codeword
                 case NewGame:
                     const newGame = parsedMessaged as NewGame;
                     console.log("new game", newGame);
@@ -75,66 +91,87 @@ export class SessionController implements WebSocketController {
                     console.log("fill key", fillKey);
                     this.fillKey(fillKey, (<WebSocketClient><unknown>ws).uuid);
                     break;
+
+                case HighlightWord:
+                    const highlightWord = parsedMessaged as HighlightWord;
+                    console.log("highlight word", highlightWord);
+                    this.highlightWord(highlightWord, <WebSocketClient><unknown>ws);
+                    break;
+
             }
 
         });
     }
 
-    private generateGameId(): string {
-        return [
-            this.wordService.getRandomWord("adv"),
-            this.wordService.getRandomWord("verb"),
-            this.wordService.getRandomWord("adj"),
-            // this.wordService.getRandomWord("noun")
-        ].join("-").toLowerCase();
-    }
-
-    private setPlayerName(message: SetPlayerName, ws: WebSocketClient): void {
-        this.clientService.setPlayerName(ws.uuid, message.name);
+    private updatePlayer(message: UpdatePlayer, ws: WebSocketClient): void {
+        const player = this.clientService.updatePlayer(ws.uuid, message.name, message.colour);
 
         // Update all games the player is in, and notify other players
         Array.from(this.games.values())
             .filter(game => game.players.find(player => player.id === ws.uuid) !== null)
             .forEach(game => {
                 let gamePlayer = game.players.find(player => player.id === ws.uuid);
-                gamePlayer.name = message.name;
+                if (gamePlayer) {
+                    gamePlayer.name = message.name;
 
-                const playerNameChanged = new PlayerNameChanged();
-                playerNameChanged.clientId = ws.uuid;
-                playerNameChanged.name = message.name;
-                game.players
-                    .filter(player => player.id !== ws.uuid)
-                    .forEach(player => {
-                        const client = this.clientService.getClient(player.id);
-                        if (!client) {
-                            console.warn(`Unable to find client with id ${player.id}`);
-                            // TODO error/remove from game
-                        } else {
-                            console.log(`Sending to ${player.id}`, playerNameChanged);
-                            client.send(JSON.stringify(playerNameChanged));
-                        }
-                    });
+                    const playerUpdated = new PlayerUpdated();
+                    playerUpdated.player = player;
+                    
+                    this.sendMessageToPlayers(game, playerUpdated);
+                }
             });
     }
 
-    private newGame(newGame: NewGame, ws: WebSocketClient): void {
-        const id = this.generateGameId();
-        const key = this.codeWordService.generateKey();
-        const grid = this.codeWordService.generateGrid(newGame.width, newGame.height, key);
+    private newMinesweeperGame(message: NewMinesweeperGame, ws: WebSocketClient): void {
         const player = this.clientService.getPlayer(ws.uuid);
-        const game = <Game>{
-            id: id,
-            grid: grid,
-            players: [
-                player
-            ],
-            key: key,
-            startedAt: new Date(Date.now())
-        };
-        this.games.set(id, game);
-        const newGameCreated = new NewGameCreated();
+        const game = this.minesweeperService.generateGame(message.options);
+        game.id = this.codeWordService.generateGameId();
+        game.players = [player];
+
+        this.games.set(game.id, game);
+
+        const newGameCreated = new NewGameCreated();;
         newGameCreated.game = game;
         ws.send(JSON.stringify(newGameCreated));
+
+        const playerJoinedGame = new PlayerJoinedGame();
+        playerJoinedGame.player = player;
+        ws.send(JSON.stringify(playerJoinedGame));
+    }
+
+    private selectMinesweeperCell(message: SelectMinesweeperCell, ws: WebSocketClient): void {
+        const game = this.games.get(message.gameId) as MinesweeperGame;
+        const currentPlayer = this.clientService.getPlayer(ws.uuid);
+
+        if (message.placeFlag) {
+            game.grid[message.y][message.x].isFlag = true;
+        } else {
+            game.grid[message.y][message.x].isSelected = true;
+        }
+        game.grid[message.y][message.x].selectedBy = currentPlayer;
+
+        const minesweeperCellSelected = new MinesweeperCellSelected();
+        minesweeperCellSelected.x = message.x;
+        minesweeperCellSelected.y = message.y;
+        minesweeperCellSelected.byPlayer = currentPlayer;
+        minesweeperCellSelected.isFlag = message.placeFlag;
+
+        this.sendMessageToPlayers(game, minesweeperCellSelected);
+    }
+
+    private newGame(newGame: NewGame, ws: WebSocketClient): void {
+        const game = this.codeWordService.generateGame(newGame.width, newGame.height);
+        const player = this.clientService.getPlayer(ws.uuid);
+        game.players = [player];
+        this.games.set(game.id, game);
+
+        const newGameCreated = new NewGameCreated();
+        newGameCreated.game = game;
+        ws.send(JSON.stringify(newGameCreated));    
+
+        const playerJoinedGame = new PlayerJoinedGame();
+        playerJoinedGame.player = player;    
+        ws.send(JSON.stringify(playerJoinedGame));
     }
 
     private joinGame(message: JoinGame, ws: WebSocketClient): void {
@@ -148,6 +185,11 @@ export class SessionController implements WebSocketController {
             return;
         }
 
+        if (game.players.find(p => p.id === ws.uuid)) {
+            console.warn(`Player already part of game with id ${gameId}`);
+            return;
+        }
+
         game.players.push(currentPlayer);
 
         const joinGameSucceeded = new JoinGameSucceeded();
@@ -155,25 +197,14 @@ export class SessionController implements WebSocketController {
         ws.send(JSON.stringify(joinGameSucceeded));
 
         const playerJoinedGame = new PlayerJoinedGame();
-        playerJoinedGame.player = currentPlayer;
-        game.players
-            .filter(player => player !== currentPlayer)
-            .forEach(player => {
-                const client = this.clientService.getClient(player.id);
-                if (!client) {
-                    console.warn(`Unable to find client with id ${player.id}`);
-                    // TODO error/remove from game
-                } else {
-                    console.log(`Sending to ${player.id}`, playerJoinedGame);
-                    client.send(JSON.stringify(playerJoinedGame));
-                }
-            });
+        playerJoinedGame.player = currentPlayer;        
+        this.sendMessageToPlayers(game, playerJoinedGame);
     }
 
     private fillCell(message: FillCell, clientId: string): void {
         console.log("fill cell", message);
 
-        const game = this.games.get(message.gameId);
+        const game = this.games.get(message.gameId) as CodewordGame;
         if (!game) {
             console.error(`game ${message.gameId} not found!`);
             return;
@@ -188,24 +219,11 @@ export class SessionController implements WebSocketController {
         cellFilled.value = message.value;
         cellFilled.byPlayer = player;
         
-        game.players
-            .filter(player => player.id !== clientId)
-            .forEach(player => {
-                const client = this.clientService.getClient(player.id);
-                if (!client) {
-                    console.warn(`Unable to find client with id ${player.id}`);
-                    // TODO error/remove from game
-                } else {
-                    console.log(`Sending to ${player.id}`, cellFilled);
-                    client.send(JSON.stringify(cellFilled));
-                }
-            });        
+        this.sendMessageToPlayers(game, cellFilled);    
     }
 
     private fillKey(message: FillKey, clientId: string): void {
-        console.log("fill cell", message);
-
-        const game = this.games.get(message.gameId);
+        const game = this.games.get(message.gameId) as CodewordGame;
         if (!game) {
             console.error(`game ${message.gameId} not found!`);
             return;
@@ -219,18 +237,40 @@ export class SessionController implements WebSocketController {
         keyFilled.value = message.value;
         keyFilled.byPlayer = player;
         
+        this.sendMessageToPlayers(game, keyFilled);    
+    }
+
+    private highlightWord(message: HighlightWord, ws: WebSocketClient): void {
+        const game = this.games.get(message.gameId) as CodewordGame;
+        if (!game) {
+            console.error(`game ${message.gameId} not found!`);
+            return;
+        }
+
+        const player = this.clientService.getPlayer(ws.uuid);
+
+        const wordHighlighted = new WordHighlighted();
+        wordHighlighted.word = message.word;
+        wordHighlighted.byPlayer = player;
+        game.highlightedWords[ws.uuid] = wordHighlighted;
+
+        this.sendMessageToPlayers(game, wordHighlighted);
+    }
+    
+
+    private sendMessageToPlayers(game: Game, message: Message): void {
         game.players
-            .filter(player => player.id !== clientId)
             .forEach(player => {
                 const client = this.clientService.getClient(player.id);
                 if (!client) {
                     console.warn(`Unable to find client with id ${player.id}`);
                     // TODO error/remove from game
+                } else if(client.readyState === client.CLOSED) {
+                    console.warn(`Client with id ${player.id} is closed`);
                 } else {
-                    console.log(`Sending to ${player.id}`, keyFilled);
-                    client.send(JSON.stringify(keyFilled));
+                    console.log(`Sending to ${player.id}`, message);
+                    client.send(JSON.stringify(message));
                 }
-            });        
+            });
     }
-    
 }

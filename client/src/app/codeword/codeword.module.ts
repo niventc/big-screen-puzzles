@@ -4,18 +4,19 @@ import { FormsModule } from '@angular/forms';
 
 import { CodewordComponent } from './codeword/codeword.component';
 import { SessionsModule } from '../sessions/sessions.module';
-import { GameComponent } from './game/game.component';
 import { CodeWordRoutingModule } from './codeword-routing.module';
+import { SharedModule } from '../shared/shared.module';
 
 
 
 @NgModule({
-  declarations: [CodewordComponent, GameComponent],
+  declarations: [CodewordComponent],
   imports: [
     CommonModule,
     FormsModule,
     SessionsModule,
-    CodeWordRoutingModule
+    CodeWordRoutingModule,
+    SharedModule
   ]
 })
 export class CodewordModule { }

@@ -1,5 +1,6 @@
 import { WordService } from 'src/words/word.service';
-import { Cell, Key } from 'big-screen-puzzles-contract';
+import { Cell, Key, CodewordGame } from 'big-screen-puzzles-contract';
+import { Word } from 'big-screen-puzzles-contract/src/codeword/word';
 
 export class CodeWordService {
 
@@ -36,6 +37,44 @@ export class CodeWordService {
         return missingCharacters.length > 0 ? [`[${missingCharacters.join('')}]`] : ['[a-z]'];
     }
 
+    public generateGame(width: number, height: number): CodewordGame {
+        const key = this.generateKey();
+        const grid = this.generateGrid(width, height, key);
+        const words = this.words.map(w => {
+            const word = new Word();
+            word.value = w;
+            word.definition = this.wordService.findWord(w);
+            return word;
+        });
+
+        const startingLetterCount = Math.round(Math.random() * 1) + 2;
+        for (let i = 0; i < startingLetterCount; i++) {
+            const keyIndex = Math.round(Math.random() * 25) + 1;
+
+            const foundKey = key.find(x => x.key === keyIndex);
+            foundKey.isLocked = true;
+        }
+
+        const game = new CodewordGame();
+        game.id = this.generateGameId();
+        game.key = key;
+        game.grid = grid;
+        game.words = words;
+        game.startedAt = new Date(Date.now());
+        game.highlightedWords = {};
+
+        return game;
+    }
+
+    public generateGameId(): string {
+        return [
+            this.wordService.getRandomWord("adv"),
+            this.wordService.getRandomWord("verb"),
+            this.wordService.getRandomWord("adj"),
+            // this.wordService.getRandomWord("noun")
+        ].join("-").toLowerCase();
+    }
+
     public generateKey(): Array<Key> {        
         const characters = [...this.characters];
     
@@ -56,6 +95,7 @@ export class CodeWordService {
         let grid: Array<Array<Cell>>;
         let fullHouse = false;
         while (!fullHouse) {
+            console.log("Attempting to generate grid...");
             let start = new Date().getTime();
             this.words = [];
 
@@ -111,7 +151,7 @@ export class CodeWordService {
                     if (nextRemaining !== 3) {
                         // console.log("adding word");
                         for (const letter of nextWord) {
-                            grid[localX++][y].setValue(letter, key);
+                            grid[localX++][y].setValue(letter, nextWord, key);
                         }
                         this.words.push(nextWord);
                         column.push(gap);
@@ -173,7 +213,7 @@ export class CodeWordService {
                             // console.log(`found ${word}`);
                             for (const letter of word) {
                                 try {
-                                grid[x][y++].setValue(letter, key);
+                                grid[x][y++].setValue(letter, word, key);
                                 } catch (e) {
                                     console.error(e, x, y);
                                     this.prettyPrintGrid(grid);

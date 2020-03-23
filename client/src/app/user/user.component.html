@@ -1,6 +1,15 @@
 <div id="client-status">
-    <form (ngSubmit)="changeName()">
-        Welcome <input type="text" name="playerName" matInput [(ngModel)]="player.name" placeholder="Player (set name)">!
-        <span id="circle" [ngClass]="{ 'connected': isConnected }"></span>
-    </form>
+    <form id="updatePlayer" (ngSubmit)="changeName()"></form>
+    Welcome <input type="text" 
+                    name="playerName" 
+                    form="updatePlayer"
+                    matInput [(ngModel)]="player.name"
+                    [(colorPicker)]="player.colour"
+                    [cpAlphaChannel]="'disabled'"
+                    [cpOutputFormat]="'rgba'"
+                    [cpPosition]="'bottom'"
+                    [cpPositionOffset]="'0%'"
+                    [style.color]="player.colour"
+                    placeholder="Player (set name/colour)">!
+    <span id="circle" [ngClass]="{ 'connected': isConnected }"></span>    
 </div>

@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { CodewordComponent } from './codeword/codeword.component';
+import { MinesweeperComponent } from './minesweeper.component';
 
 const routes: Routes = [
   {
-    path: 'codeword',
-    component: CodewordComponent,
+    path: 'minesweeper',
+    component: MinesweeperComponent,
     // children: [
     //   {
     //     path: 'game/:gameId',
@@ -19,4 +19,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class CodeWordRoutingModule { }
+export class MinesweeperRoutingModule { }

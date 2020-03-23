@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
 import { interval, Observable, Subject } from 'rxjs';
-import { map, retryWhen, tap, delay } from 'rxjs/operators';
+import { map, retryWhen, tap, delay, shareReplay } from 'rxjs/operators';
 import { Heartbeat, Message, Parser } from 'big-screen-puzzles-contract';
 
 import { environment } from './../environments/environment';
@@ -40,7 +40,8 @@ export class WebSocketService {
                         delay(1000)
                     )
             }),
-            map(message => Parser.parseMessageFromObject(message) )
+            map(message => Parser.parseMessageFromObject(message) ),
+            shareReplay()
         );
 
     this.socket$.subscribe(

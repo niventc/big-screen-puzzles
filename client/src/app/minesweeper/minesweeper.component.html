@@ -1,0 +1,25 @@
+<div id="title">
+    <h1>
+        big-screen-puzzles / minesweeper
+    </h1>
+</div>
+
+<button (click)="newGame()">New Game</button>
+
+<div class="well">
+    <input type="text" matInput [(ngModel)]="gameId" placeholder="Game Id">
+    <button (click)="joinGame()">Join Game</button>
+</div>
+
+{{game?.id}}
+
+<div class="grid" *ngFor="let row of game?.grid" style="display: flex">
+    <div class="cell" *ngFor="let cell of row" style="flex: 0 0 32px">
+        {{cell.isMine ? 'x' : '0'}}
+    </div>
+</div>
+
+
+<div>
+    <players></players>
+</div>

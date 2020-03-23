@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { WebSocketService } from '../websocket.service';
 import { filter, map } from 'rxjs/operators';
-import { PlayerConnected, Player, SetPlayerName } from 'big-screen-puzzles-contract';
+import { PlayerConnected, Player, UpdatePlayer } from 'big-screen-puzzles-contract';
 import { UserService } from './user.service';
 
 @Component({
@@ -9,7 +9,7 @@ import { UserService } from './user.service';
   templateUrl: './user.component.html',
   styleUrls: ['./user.component.scss']
 })
-export class UserComponent implements OnInit {
+export class UserComponent implements OnInit {  
 
   public player: Player = <any>{};
   public isConnected: boolean;
@@ -37,9 +37,11 @@ export class UserComponent implements OnInit {
   }
 
   public changeName(): void {
-    const changePlayerName = new SetPlayerName();
-    changePlayerName.name = this.player.name;
-    this.webSocketService.sendMessage(changePlayerName);
+    console.log("change name");
+    const updatePlayer = new UpdatePlayer();
+    updatePlayer.name = this.player.name;
+    updatePlayer.colour = this.player.colour;
+    this.webSocketService.sendMessage(updatePlayer);
   }
 
 }

@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { ColorPickerModule } from 'ngx-color-picker';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -10,6 +11,7 @@ import { WebSocketService } from './websocket.service';
 import { UserComponent } from './user/user.component';
 import { UserService } from './user/user.service';
 import { FormsModule } from '@angular/forms';
+import { MinesweeperModule } from './minesweeper/minesweeper.module';
 
 @NgModule({
   declarations: [
@@ -20,8 +22,10 @@ import { FormsModule } from '@angular/forms';
   imports: [
     BrowserModule,
     AppRoutingModule,
+    ColorPickerModule,
     FormsModule,
     CodewordModule,
+    MinesweeperModule,
     SessionsModule
   ],
   providers: [

@@ -1,0 +1,4 @@
+<h1>Players</h1>
+<ul>
+    <li *ngFor="let player of players" [style.color]="player.colour">{{player.name ? player.name : player.id}}</li>
+</ul>

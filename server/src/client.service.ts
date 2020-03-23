@@ -7,6 +7,13 @@ export declare class WebSocketClient extends WebSocket {
 
 export class ClientService {
 
+    static getRandomColor(): string {
+        const r = Math.round(Math.random() * 255);
+        const g = Math.round(Math.random() * 255);
+        const b = Math.round(Math.random() * 255);
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
     private clients = new Map<string, WebSocketClient>();
     private clientPlayers = new Map<string, Player>();
 
@@ -22,6 +29,7 @@ export class ClientService {
         if (!player) {
             player = new Player();
             player.id = clientId;
+            player.colour = ClientService.getRandomColor();
             this.clientPlayers.set(clientId, player);
         }
 
@@ -41,13 +49,19 @@ export class ClientService {
         this.clients.delete(clientId);
     }
 
-    public setPlayerName(clientId: string, name: string): void {
+    public updatePlayer(clientId: string, name?: string, colour?: string): Player {
         let player = this.clientPlayers.get(clientId);
         if (!player) {
             console.error(`Unable to set name ${name} as unable to find client with id ${clientId}`);
             return;
         }
-        player.name = name;
+        if (name) {
+            player.name = name;
+        }
+        if (colour) {
+            player.colour = colour;
+        }
+        return player;
     }
 
 }
