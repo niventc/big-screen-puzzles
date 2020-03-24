@@ -157,6 +157,15 @@ export class SessionController implements WebSocketController {
         minesweeperCellSelected.isFlag = message.placeFlag;
 
         this.sendMessageToPlayers(game, minesweeperCellSelected);
+
+        if (!message.placeFlag) {
+            this.minesweeperService.getEmptyNeighbours(game.grid, message.x, message.y)
+                .forEach(m => {
+                    m.byPlayer = currentPlayer;
+                    
+                    this.sendMessageToPlayers(game, m);
+                });
+        }
     }
 
     private newGame(newGame: NewGame, ws: WebSocketClient): void {
@@ -185,12 +194,10 @@ export class SessionController implements WebSocketController {
             return;
         }
 
-        if (game.players.find(p => p.id === ws.uuid)) {
-            console.warn(`Player already part of game with id ${gameId}`);
-            return;
+        // client might refresh and want to rejoin
+        if (!game.players.find(p => p.id === ws.uuid)) {
+            game.players.push(currentPlayer);            
         }
-
-        game.players.push(currentPlayer);
 
         const joinGameSucceeded = new JoinGameSucceeded();
         joinGameSucceeded.game = game;

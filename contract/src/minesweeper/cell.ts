@@ -5,4 +5,5 @@ export class MinesweeperCell {
     public isMine: boolean;
     public isSelected: boolean;
     public selectedBy: Player;
+    public touchingMineCount: number;
 }

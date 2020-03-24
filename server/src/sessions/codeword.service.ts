@@ -47,11 +47,14 @@ export class CodeWordService {
             return word;
         });
 
-        const startingLetterCount = Math.round(Math.random() * 1) + 2;
+        const startingLetterCount = Math.max(2, Math.round(Math.random() * 1) + 2);
         for (let i = 0; i < startingLetterCount; i++) {
             const keyIndex = Math.round(Math.random() * 25) + 1;
 
-            const foundKey = key.find(x => x.key === keyIndex);
+            let foundKey = key.find(x => x.key === keyIndex);
+            while (foundKey.isLocked) {
+                foundKey = key.find(x => x.key === keyIndex);
+            }
             foundKey.isLocked = true;
         }
 

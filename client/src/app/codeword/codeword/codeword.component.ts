@@ -33,20 +33,6 @@ export class CodewordComponent implements OnInit {
   }
 
   public newGame(): void {
-    this.webSocketService.message$
-      .pipe(
-        filter(message => message.type === "NewGameCreated"),
-        first(),
-        map(message => message as NewGameCreated)
-      )
-      .subscribe(newGameCreated => {
-        console.log("[NewGameCreated]", newGameCreated);
-        if (newGameCreated.game.type === "codeword") {
-          this.game = newGameCreated.game as CodewordGame;
-        }
-        // this.router.navigate(['game', newGameCreated.game.id], { relativeTo: this.route });
-      });
-
     const newGame = new NewGame();
     newGame.width = this.width;
     newGame.height = this.height;
@@ -56,25 +42,39 @@ export class CodewordComponent implements OnInit {
   public ngOnInit(): void {
     this.webSocketService.message$
       .subscribe(message => {
-        if (message.type === "PlayerJoinedGame") {
+        if (message.type === "NewGameCreated") {
+          const newGame = (<NewGameCreated>message).game;
+          if (newGame.type === "codeword") {
+            this.game = newGame as CodewordGame;
+          }
+          // this.router.navigate(['game', newGameCreated.game.id], { relativeTo: this.route });
+        } else if (message.type === "PlayerJoinedGame") {
           this.game.players.push((<PlayerJoinedGame>message).player);
 
           this.events.unshift(`Player ${(<PlayerJoinedGame>message).player.name} joined the game!`);
         } else if (message.type === "JoinGameSucceeded") {
           const game = (<JoinGameSucceeded>message).game;
           if (game.type === "codeword") {
-            this.game = (<JoinGameSucceeded>message).game as CodewordGame;
+            this.game = game as CodewordGame;
           }
         } else if (message.type === "CellFilled") {
           const cellFilled = message as CellFilled;
           this.game.grid[cellFilled.x][cellFilled.y].playerValue = cellFilled.value;
 
-          this.events.unshift(`Player ${cellFilled.byPlayer.name} filled ${cellFilled.x},${cellFilled.y} with ${cellFilled.value}!`);
+          if (cellFilled.value) {
+            this.events.unshift(`Player ${cellFilled.byPlayer.name} filled ${cellFilled.x},${cellFilled.y} with ${cellFilled.value}!`);
+          } else {
+            this.events.unshift(`Player ${cellFilled.byPlayer.name} cleared ${cellFilled.x},${cellFilled.y}!`);
+          }
         } else if (message.type === "KeyFilled") {
           const keyFilled = message as KeyFilled;
           this.game.key.find(k => k.key === keyFilled.key).playerValue = keyFilled.value;
 
-          this.events.unshift(`Player ${keyFilled.byPlayer.name} thinks ${keyFilled.key} is ${keyFilled.value}!`);
+          if (keyFilled.value) {
+            this.events.unshift(`Player ${keyFilled.byPlayer.name} thinks ${keyFilled.key} is ${keyFilled.value}!`);
+          } else {
+            this.events.unshift(`Player ${keyFilled.byPlayer.name} cleared key ${keyFilled.key}!`);
+          }          
         } else if (message.type === "WordHighlighted") {
           const wordHighlighted = message as WordHighlighted;
           this.game.highlightedWords[wordHighlighted.byPlayer.id] = wordHighlighted;
@@ -106,26 +106,66 @@ export class CodewordComponent implements OnInit {
   }
 
   public updateCell(rowIndex: number, columnIndex: number, event: string): void {
-    if (event && event.length === 1) {
-      const fillCell = new FillCell();
-      fillCell.gameId = this.game.id;
-      fillCell.x = rowIndex;
-      fillCell.y = columnIndex;
-      fillCell.value = event;
-      this.webSocketService.sendMessage(fillCell);
-
-      this.game.grid[rowIndex][columnIndex].playerValue = event;
-      console.log("[CellFilled]", rowIndex, columnIndex, event);
-    }
-
     const highlightWord = new HighlightWord();
     highlightWord.gameId = this.game.id;
     highlightWord.word = this.game.grid[rowIndex][columnIndex].words[0];
     this.webSocketService.sendMessage(highlightWord);
+
+    if (event) {
+
+      let value: string;
+      if (event.length === 1) {
+        value = event;
+      } else if (event.toLowerCase() === "backspace" || event.toLowerCase() === "delete" || event === 'clear') {
+        value = undefined;
+      } else {
+        // some other weird character
+        return;
+      }
+
+      if (this.game.grid[rowIndex][columnIndex].playerValue === value) {
+        // same, skip
+        return;
+      }
+
+      const fillCell = new FillCell();
+      fillCell.gameId = this.game.id;
+      fillCell.x = rowIndex;
+      fillCell.y = columnIndex;
+      fillCell.value = value;
+      this.webSocketService.sendMessage(fillCell);
+
+      this.game.grid[rowIndex][columnIndex].playerValue = value;
+      console.log("[CellFilled]", rowIndex, columnIndex, value);
+    }
   }
 
-  public updateKey(key: Key, value: string): void {
-    if (!key.isLocked && value && value.length === 1) {
+  public updateKey(key: Key, event: string): void {
+    if (!key.isLocked && event) {
+
+      let value: string;
+      if (event.length === 1) {
+        value = event;
+      } else if (event.toLowerCase() === "backspace" || event.toLowerCase() === "delete" || event === 'clear') {
+        value = undefined;
+      } else {
+        // some other weird character
+        return;
+      }
+
+      if (key.playerValue === value) {
+        // samesies, do nothing
+        return;
+      }
+
+      const existingKey = this.game.key.find(k => value && k.playerValue === value);
+      console.log("existingkey", existingKey);
+      if (existingKey) {
+        // value already set to key
+        this.events.unshift(`[PRIVATE] Value ${value} already set in key!`);
+        return;
+      }
+
       const fillKey = new FillKey();
       fillKey.gameId = this.game.id;
       fillKey.key = key.key;

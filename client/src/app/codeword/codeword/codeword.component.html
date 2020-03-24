@@ -44,6 +44,7 @@
     <div style="flex: 1 1 auto; color: white">
         <h1>Control</h1>
         <button (click)="reveal = !reveal">Toggle Reveal</button>
+        <button [ngClass]="{ 'selected': 'clear' === selectedCharacter }" (click)="selectCharacter('clear')">Clear Cell</button>
         <div class="row" style="display: flex; width: 416px; flex-flow: row; flex-wrap: wrap;">
             <button style="flex: 0 0 32px; height: 32px" 
                     *ngFor="let char of characters" 

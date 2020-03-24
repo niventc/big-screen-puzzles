@@ -13,9 +13,13 @@
 
 {{game?.id}}
 
-<div class="grid" *ngFor="let row of game?.grid" style="display: flex">
-    <div class="cell" *ngFor="let cell of row" style="flex: 0 0 32px">
-        {{cell.isMine ? 'x' : '0'}}
+<div class="grid" *ngFor="let row of game?.grid; let y = index" style="display: flex">
+    <div class="cell" 
+         *ngFor="let cell of row; let x = index" 
+         style="flex: 0 0 32px" 
+         [style.backgroundColor]="cell.isSelected ? cell.selectedBy.colour : ''"
+         (click)="selectCell(x, y, cell)">
+        {{cell.isSelected && !cell.isMine ? cell.touchingMineCount : (cell.isMine ? 'x' : '')}}
     </div>
 </div>
 

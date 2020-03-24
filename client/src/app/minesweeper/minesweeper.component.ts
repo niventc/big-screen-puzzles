@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { WebSocketService } from '../websocket.service';
 import { filter, first, map } from 'rxjs/operators';
-import { NewMinesweeperGame, NewGameCreated, MinesweeperOptions, MinesweeperGame, JoinGame } from 'big-screen-puzzles-contract';
+import { NewMinesweeperGame, NewGameCreated, MinesweeperOptions, MinesweeperGame, JoinGame, MinesweeperCell, SelectMinesweeperCell, MinesweeperCellSelected, JoinGameSucceeded } from 'big-screen-puzzles-contract';
 
 @Component({
   selector: 'app-minesweeper',
   templateUrl: './minesweeper.component.html',
   styleUrls: ['./minesweeper.component.scss']
 })
-export class MinesweeperComponent {
+export class MinesweeperComponent implements OnInit {
 
   public difficulties = [
     <MinesweeperOptions>{
@@ -37,7 +37,7 @@ export class MinesweeperComponent {
     }
   ];
 
-  public selectedOptions: MinesweeperOptions = this.difficulties[0];
+  public selectedOptions: MinesweeperOptions = this.difficulties[2];
 
   public game: MinesweeperGame;
   public gameId: string;
@@ -47,21 +47,33 @@ export class MinesweeperComponent {
   ) {
   }
 
-  public newGame(): void {
+  public ngOnInit(): void {
     this.webSocketService.message$
-      .pipe(
-        filter(message => message.type === "NewGameCreated"),
-        first(),
-        map(message => message as NewGameCreated)
-      )
-      .subscribe(newGameCreated => {
-        console.log("[NewGameCreated]", newGameCreated);
-        if (newGameCreated.game.type === "minesweeper") {
-          this.game = newGameCreated.game as MinesweeperGame;
+      .subscribe(message => {
+        if (message.type === "NewGameCreated") {
+          const newGameCreated = message as NewGameCreated;
+          console.log("[NewGameCreated]", newGameCreated);
+          if (newGameCreated.game.type === "minesweeper") {
+            this.game = newGameCreated.game as MinesweeperGame;
+          }
+          // this.router.navigate(['game', newGameCreated.game.id], { relativeTo: this.route });
+        } else if (message.type === "JoinGameSucceeded") {
+          const joinGame = message as JoinGameSucceeded;
+          console.log("[JoinGameSucceeded]", joinGame);
+          if (joinGame.game.type === "minesweeper") {
+            this.game = joinGame.game as MinesweeperGame;
+          }
+          // this.router.navigate(['game', newGameCreated.game.id], { relativeTo: this.route });
+        } else if (message.type === "MinesweeperCellSelected") {
+          const minesweeperCellSelected = message as MinesweeperCellSelected;
+          console.log("select cell", minesweeperCellSelected);
+          this.game.grid[minesweeperCellSelected.y][minesweeperCellSelected.x].isSelected = true;
+          this.game.grid[minesweeperCellSelected.y][minesweeperCellSelected.x].selectedBy = minesweeperCellSelected.byPlayer;
         }
-        // this.router.navigate(['game', newGameCreated.game.id], { relativeTo: this.route });
-      });
+      })
+  }
 
+  public newGame(): void {
     const newGame = new NewMinesweeperGame();
     newGame.options = this.selectedOptions;
     this.webSocketService.sendMessage(newGame);
@@ -71,6 +83,14 @@ export class MinesweeperComponent {
     const joinGame = new JoinGame();
     joinGame.gameId = this.gameId;
     this.webSocketService.sendMessage(joinGame);
+  }
+
+  public selectCell(x: number, y: number, cell: MinesweeperCell): void {
+    const selectMinesweeperCell = new SelectMinesweeperCell();
+    selectMinesweeperCell.x = x;
+    selectMinesweeperCell.y = y;
+    selectMinesweeperCell.gameId = this.game.id;
+    this.webSocketService.sendMessage(selectMinesweeperCell);
   }
 
 }
