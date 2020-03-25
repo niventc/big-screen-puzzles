@@ -21,6 +21,8 @@
     "@angular/platform-browser-dynamic": "~8.2.11",
     "@angular/router": "~8.2.11",
     "big-screen-puzzles-contract": "file:../contract",
+    "humanize-duration": "^3.22.0",
+    "moment": "^2.24.0",
     "ngx-color-picker": "^8.2.0",
     "rxjs": "~6.4.0",
     "rxjs-compat": "^6.5.3",

@@ -1,8 +1,8 @@
 import { Cell } from "./cell";
 import { Key } from "./key";
 import { Word } from './word';
-import { WordHighlighted } from '../messages/heartbeat';
 import { Game } from '../game';
+import { WordHighlighted } from "./messages";
 
 export class CodewordGame extends Game {
     public grid: Array<Array<Cell>>;

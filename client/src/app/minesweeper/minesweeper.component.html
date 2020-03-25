@@ -4,7 +4,12 @@
     </h1>
 </div>
 
-<button (click)="newGame()">New Game</button>
+<select [(ngModel)]="selectedDifficulty">
+    <option *ngFor="let difficulty of difficulties" [ngValue]="difficulty">
+        {{difficulty.width + 'x' + difficulty.height + '(' + difficulty.numberOfMines + 'mines)'}}
+    </option>
+</select>
+<button (click)="newGame()">New Game</button>{{selectedDifficulty | json}}
 
 <div class="well">
     <input type="text" matInput [(ngModel)]="gameId" placeholder="Game Id">
@@ -13,13 +18,16 @@
 
 {{game?.id}}
 
+<button (click)="revealMines = !revealMines" [style.backgroundColor]="revealMines ? 'red' : ''">Toggle Reveal Mines</button>
+<button (click)="placeFlag = !placeFlag" [style.backgroundColor]="placeFlag ? 'red' : ''">Place Flag</button>
+
 <div class="grid" *ngFor="let row of game?.grid; let y = index" style="display: flex">
     <div class="cell" 
          *ngFor="let cell of row; let x = index" 
          style="flex: 0 0 32px" 
          [style.backgroundColor]="cell.isSelected ? cell.selectedBy.colour : ''"
          (click)="selectCell(x, y, cell)">
-        {{cell.isSelected && !cell.isMine ? cell.touchingMineCount : (cell.isMine ? 'x' : '')}}
+        {{cell.isSelected ? (cell.isFlag ? 'F' : (cell.isMine ? 'X' : cell.touchingMineCount)) : (revealMines && cell.isMine ? 'xx' : '')}}
     </div>
 </div>
 

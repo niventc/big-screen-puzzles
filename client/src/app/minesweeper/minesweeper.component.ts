@@ -1,7 +1,8 @@
+import * as humanize from 'humanize-duration';
+
 import { Component, OnInit } from '@angular/core';
 import { WebSocketService } from '../websocket.service';
-import { filter, first, map } from 'rxjs/operators';
-import { NewMinesweeperGame, NewGameCreated, MinesweeperOptions, MinesweeperGame, JoinGame, MinesweeperCell, SelectMinesweeperCell, MinesweeperCellSelected, JoinGameSucceeded } from 'big-screen-puzzles-contract';
+import { NewMinesweeperGame, NewGameCreated, MinesweeperOptions, MinesweeperGame, JoinGame, MinesweeperCell, SelectMinesweeperCell, MinesweeperCellSelected, JoinGameSucceeded, GameOver } from 'big-screen-puzzles-contract';
 
 @Component({
   selector: 'app-minesweeper',
@@ -36,11 +37,13 @@ export class MinesweeperComponent implements OnInit {
       height: 30
     }
   ];
-
-  public selectedOptions: MinesweeperOptions = this.difficulties[2];
+  public selectedDifficulty: MinesweeperOptions = this.difficulties[0];
 
   public game: MinesweeperGame;
   public gameId: string;
+  public isGameOver = false;
+  public placeFlag = false;
+  public revealMines = false;
 
   constructor(
     private webSocketService: WebSocketService
@@ -55,6 +58,7 @@ export class MinesweeperComponent implements OnInit {
           console.log("[NewGameCreated]", newGameCreated);
           if (newGameCreated.game.type === "minesweeper") {
             this.game = newGameCreated.game as MinesweeperGame;
+            this.isGameOver = false;
           }
           // this.router.navigate(['game', newGameCreated.game.id], { relativeTo: this.route });
         } else if (message.type === "JoinGameSucceeded") {
@@ -62,6 +66,7 @@ export class MinesweeperComponent implements OnInit {
           console.log("[JoinGameSucceeded]", joinGame);
           if (joinGame.game.type === "minesweeper") {
             this.game = joinGame.game as MinesweeperGame;
+            this.isGameOver = false;
           }
           // this.router.navigate(['game', newGameCreated.game.id], { relativeTo: this.route });
         } else if (message.type === "MinesweeperCellSelected") {
@@ -69,13 +74,23 @@ export class MinesweeperComponent implements OnInit {
           console.log("select cell", minesweeperCellSelected);
           this.game.grid[minesweeperCellSelected.y][minesweeperCellSelected.x].isSelected = true;
           this.game.grid[minesweeperCellSelected.y][minesweeperCellSelected.x].selectedBy = minesweeperCellSelected.byPlayer;
+          this.game.grid[minesweeperCellSelected.y][minesweeperCellSelected.x].isFlag = minesweeperCellSelected.isFlag;
+        } else if (message.type === "GameOver") {
+          const gameOver = message as GameOver;
+          console.log("game over", gameOver);
+          if (gameOver.isSuccess) {
+            alert("You won in only " + humanize(gameOver.timeTaken) + "!");
+          } else {
+            alert("You lost in " + humanize(gameOver.timeTaken) + "!");
+          }
+          this.isGameOver = true;
         }
       })
   }
 
   public newGame(): void {
     const newGame = new NewMinesweeperGame();
-    newGame.options = this.selectedOptions;
+    newGame.options = this.selectedDifficulty;
     this.webSocketService.sendMessage(newGame);
   }
   
@@ -86,11 +101,13 @@ export class MinesweeperComponent implements OnInit {
   }
 
   public selectCell(x: number, y: number, cell: MinesweeperCell): void {
-    const selectMinesweeperCell = new SelectMinesweeperCell();
-    selectMinesweeperCell.x = x;
-    selectMinesweeperCell.y = y;
-    selectMinesweeperCell.gameId = this.game.id;
-    this.webSocketService.sendMessage(selectMinesweeperCell);
+    if (!this.isGameOver) {
+      const selectMinesweeperCell = new SelectMinesweeperCell();
+      selectMinesweeperCell.x = x;
+      selectMinesweeperCell.y = y;
+      selectMinesweeperCell.gameId = this.game.id;
+      selectMinesweeperCell.placeFlag = this.placeFlag;
+      this.webSocketService.sendMessage(selectMinesweeperCell);
+    }
   }
-
 }

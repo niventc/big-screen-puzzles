@@ -1,5 +1,4 @@
 import { Message } from './message';
-import { CodewordGame } from '../codeword';
 import { Player } from '../player';
 import { Game } from '../game';
 
@@ -50,36 +49,6 @@ export class PlayerJoinedGame extends Message {
     }
 }
 
-export class CellFilled extends Message {
-    public x: number;
-    public y: number;
-    public value: string;
-    public byPlayer: Player;
-
-    constructor() {
-        super("CellFilled");
-    }
-}
-
-export class KeyFilled extends Message {
-    public key: number;
-    public value: string;
-    public byPlayer: Player;
-
-    constructor() {
-        super("KeyFilled");
-    }
-}
-
-export class WordHighlighted extends Message {
-    public word: string;
-    public byPlayer: Player;
-
-    constructor() {
-        super("WordHighlighted");
-    }
-}
-
 /* Commands */
 export class UpdatePlayer extends Message {
     public name?: string;
@@ -99,6 +68,15 @@ export class NewGame extends Message {
     }
 }
 
+export class GameOver extends Message {
+    public isSuccess: boolean;
+    public timeTaken: number;
+
+    constructor() {
+        super("GameOver");
+    }
+}
+
 export class JoinGame extends Message {
     public gameId: string;
 
@@ -107,32 +85,3 @@ export class JoinGame extends Message {
     }
 }
 
-export class FillKey extends Message {
-    public gameId: string;
-    public key: number;
-    public value: string;
-
-    constructor() {
-        super("FillKey");
-    }
-}
-
-export class FillCell extends Message {
-    public gameId: string;
-    public x: number;
-    public y: number;
-    public value: string;
-
-    constructor() {
-        super("FillCell");
-    }
-}
-
-export class HighlightWord extends Message {
-    public gameId: string;
-    public word: string;
-
-    constructor() {
-        super("HighlightWord");
-    }
-}

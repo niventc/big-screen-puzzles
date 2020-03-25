@@ -3,7 +3,7 @@ import { Router } from 'express-ws';
 import { WebsocketRequestHandler } from 'express-ws';
 
 import { WebSocketController } from 'src/server';
-import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game, PlayerJoinedGame, JoinGameSucceeded, FillCell, CellFilled, FillKey, KeyFilled, UpdatePlayer, PlayerUpdated, HighlightWord, WordHighlighted, NewMinesweeperGame, MinesweeperGameCreated, SelectMinesweeperCell, MinesweeperCellSelected, MinesweeperGame, CodewordGame, Message } from 'big-screen-puzzles-contract';
+import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game, PlayerJoinedGame, JoinGameSucceeded, FillCell, CellFilled, FillKey, KeyFilled, UpdatePlayer, PlayerUpdated, HighlightWord, WordHighlighted, NewMinesweeperGame, MinesweeperGameCreated, SelectMinesweeperCell, MinesweeperCellSelected, MinesweeperGame, CodewordGame, Message, GameOver } from 'big-screen-puzzles-contract';
 import { ClientService, WebSocketClient } from 'src/client.service';
 import { WordService } from 'src/words/word.service';
 import { CodeWordService } from './codeword.service';
@@ -143,12 +143,14 @@ export class SessionController implements WebSocketController {
         const game = this.games.get(message.gameId) as MinesweeperGame;
         const currentPlayer = this.clientService.getPlayer(ws.uuid);
 
+        const cell = game.grid[message.y][message.x];
+        
         if (message.placeFlag) {
-            game.grid[message.y][message.x].isFlag = true;
+            cell.isFlag = true;
         } else {
-            game.grid[message.y][message.x].isSelected = true;
+            cell.isSelected = true;
         }
-        game.grid[message.y][message.x].selectedBy = currentPlayer;
+        cell.selectedBy = currentPlayer;
 
         const minesweeperCellSelected = new MinesweeperCellSelected();
         minesweeperCellSelected.x = message.x;
@@ -159,12 +161,28 @@ export class SessionController implements WebSocketController {
         this.sendMessageToPlayers(game, minesweeperCellSelected);
 
         if (!message.placeFlag) {
-            this.minesweeperService.getEmptyNeighbours(game.grid, message.x, message.y)
-                .forEach(m => {
-                    m.byPlayer = currentPlayer;
-                    
+            if (cell.isMine) {
+                const gameOver = new GameOver();
+                const endTime = Date.now();
+                gameOver.isSuccess = false;
+                gameOver.timeTaken = endTime - game.startedAt.getTime();
+                this.sendMessageToPlayers(game, gameOver);
+                return;
+            }  
+
+            this.minesweeperService.getEmptyNeighbours(game.grid, message.x, message.y, currentPlayer)
+                .forEach(m => {                    
                     this.sendMessageToPlayers(game, m);
                 });
+        }
+
+        if (this.minesweeperService.areAllCellsSelected(game.grid)) {            
+            const gameOver = new GameOver();
+            const endTime = Date.now();
+            gameOver.isSuccess = true;
+            gameOver.timeTaken = endTime - game.startedAt.getTime();
+            this.sendMessageToPlayers(game, gameOver);
+            return;
         }
     }
 
@@ -262,8 +280,7 @@ export class SessionController implements WebSocketController {
         game.highlightedWords[ws.uuid] = wordHighlighted;
 
         this.sendMessageToPlayers(game, wordHighlighted);
-    }
-    
+    }    
 
     private sendMessageToPlayers(game: Game, message: Message): void {
         game.players

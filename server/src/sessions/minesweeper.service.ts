@@ -1,4 +1,4 @@
-import { MinesweeperOptions, MinesweeperCell, MinesweeperGame, MinesweeperCellSelected } from 'big-screen-puzzles-contract';
+import { MinesweeperOptions, MinesweeperCell, MinesweeperGame, MinesweeperCellSelected, Player } from 'big-screen-puzzles-contract';
 
 interface MinesweeperCellWrapper extends MinesweeperCell {
     x: number;
@@ -62,7 +62,7 @@ export class MinesweeperService {
         return grid;
     }
 
-    public getEmptyNeighbours(grid: Array<Array<MinesweeperCell>>, x: number, y: number): Array<MinesweeperCellSelected> {
+    public getEmptyNeighbours(grid: Array<Array<MinesweeperCell>>, x: number, y: number, player: Player): Array<MinesweeperCellSelected> {
         // If we bigger than 0, dont check
         console.log("checking", y, x)
         if (this.safeGetGrid(grid, y, x).touchingMineCount > 0) {
@@ -70,9 +70,13 @@ export class MinesweeperService {
         }
         return this.getNeighboursUpToMine(grid, x, y, [])
             .map(c => {
+                grid[c.y][c.x].isSelected = true;
+                grid[c.y][c.x].selectedBy = player;
+
                 const message = new MinesweeperCellSelected();
                 message.x = c.x;
                 message.y = c.y;
+                message.byPlayer = player;
                 return message;
             });
     }
@@ -113,6 +117,21 @@ export class MinesweeperService {
             });
 
         return moreNeighbouringCells;
+    }
+
+    public areAllCellsSelected(grid: Array<Array<MinesweeperCell>>): boolean {
+        for (let y = 0; y < grid.length; y++) {
+            for (let x = 0; x < grid[0].length; x++) {                
+                const cell = grid[y][x];
+
+                // not selected and not a mine, still needs revealing
+                if (!cell.isSelected && !cell.isMine) {
+                    console.log("cell not selected and not mine", x, y);
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private safeGetGrid(grid: Array<Array<MinesweeperCell>>, y: number, x: number): MinesweeperCellWrapper {

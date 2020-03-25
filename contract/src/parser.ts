@@ -1,5 +1,6 @@
-import { Message, Heartbeat, NewGame, JoinGame, PlayerConnected, NewGameCreated, JoinGameSucceeded, PlayerJoinedGame, FillCell, CellFilled, KeyFilled, FillKey, WordHighlighted, HighlightWord, PlayerUpdated, UpdatePlayer } from './messages';
+import { Message, Heartbeat, NewGame, JoinGame, PlayerConnected, NewGameCreated, JoinGameSucceeded, PlayerJoinedGame, PlayerUpdated, UpdatePlayer, GameOver } from './messages';
 import { NewMinesweeperGame, SelectMinesweeperCell, MinesweeperCellSelected } from './minesweeper/messages';
+import { CellFilled, KeyFilled, WordHighlighted, FillCell, FillKey, HighlightWord } from './codeword/messages';
 
 export class Parser {
 
@@ -27,6 +28,8 @@ export class Parser {
                 return Object.assign(new PlayerUpdated(), typedMessage);
             case "NewGameCreated":
                 return Object.assign(new NewGameCreated(), typedMessage);
+            case "GameOver":
+                return Object.assign(new GameOver(), typedMessage);
 
             case "MinesweeperCellSelected":
                 return Object.assign(new MinesweeperCellSelected(), typedMessage);
