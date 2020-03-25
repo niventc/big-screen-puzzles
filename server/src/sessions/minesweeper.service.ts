@@ -106,7 +106,7 @@ export class MinesweeperService {
         neighbouringCells
             .filter(c => !!c)
             .forEach(c => {
-                if (c.isMine || c.isFlag) {
+                if (c.isMine) {
                     // do nothing
                 } else if (c.touchingMineCount === 0) {
                     moreNeighbouringCells.push(...this.getNeighboursUpToMine(grid, c.x, c.y, seen));

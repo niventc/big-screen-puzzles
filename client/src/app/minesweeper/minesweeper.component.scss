@@ -7,6 +7,13 @@
         font-size: 3em;
         margin: 0;
     }
+
+    a,
+    a:hover,
+    a:focus,
+    a:visited {
+        color: white;
+    }
 }
 
 .grid {
@@ -15,5 +22,6 @@
         height: 32px;
         background-color: white;
         border: 1px solid black;
+        font-weight: bold;
     }
 }

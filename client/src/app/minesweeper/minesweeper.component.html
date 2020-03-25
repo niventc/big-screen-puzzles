@@ -1,15 +1,15 @@
 <div id="title">
     <h1>
-        big-screen-puzzles / minesweeper
+        <a [routerLink]="['/']">big-screen-puzzles</a> / minesweeper
     </h1>
 </div>
 
 <select [(ngModel)]="selectedDifficulty">
     <option *ngFor="let difficulty of difficulties" [ngValue]="difficulty">
-        {{difficulty.width + 'x' + difficulty.height + '(' + difficulty.numberOfMines + 'mines)'}}
+        {{difficulty.name}} {{difficulty.width + 'x' + difficulty.height + '(' + difficulty.numberOfMines + 'mines)'}}
     </option>
 </select>
-<button (click)="newGame()">New Game</button>{{selectedDifficulty | json}}
+<button (click)="newGame()">New Game</button>
 
 <div class="well">
     <input type="text" matInput [(ngModel)]="gameId" placeholder="Game Id">
@@ -25,9 +25,10 @@
     <div class="cell" 
          *ngFor="let cell of row; let x = index" 
          style="flex: 0 0 32px" 
-         [style.backgroundColor]="cell.isSelected ? cell.selectedBy.colour : ''"
+         [style.backgroundColor]="cell.isSelected && !cell.isFlag ? cell.selectedBy.colour : ''"
+         [style.color]="cell.isFlag ? cell.selectedBy.colour : ''"
          (click)="selectCell(x, y, cell)">
-        {{cell.isSelected ? (cell.isFlag ? 'F' : (cell.isMine ? 'X' : cell.touchingMineCount)) : (revealMines && cell.isMine ? 'xx' : '')}}
+        {{cell.isSelected ? (cell.isFlag ? 'F' : (cell.isMine ? 'X' : (cell.touchingMineCount === 0 ? '' : cell.touchingMineCount))) : ((revealMines || this.isGameOver) && cell.isMine ? 'X' : '')}}
     </div>
 </div>
 

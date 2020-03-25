@@ -4,8 +4,8 @@
     </h1>
 </div>
 
-<div id="menu">
-    <ul>
-        <li *ngFor="let game of games"><a [routerLink]="game">{{game}}</a></li>
-    </ul>
+<div id="menu" style="display: flex; flex-direction: row">
+    <div *ngFor="let game of games" style="flex: 0 0 300px; margin: 24px">
+        <a [routerLink]="game">{{game}}</a>
+    </div>
 </div>
