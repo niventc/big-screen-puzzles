@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
 import { WebSocketService } from 'src/app/websocket.service';
-import { filter, first, map } from 'rxjs/operators';
-import { NewGameCreated, NewGame, Cell, JoinGame, Game, PlayerJoinedGame, JoinGameSucceeded, CellFilled, FillCell, FillKey, Key, KeyFilled, HighlightWord, WordHighlighted, CodewordGame } from 'big-screen-puzzles-contract';
+import { Cell, CellFilled, FillCell, FillKey, Key, KeyFilled, HighlightWord, WordHighlighted, CodewordGame } from 'big-screen-puzzles-contract';
+import { CodewordGameProvider } from '../codeword.game-provider';
 
 @Component({
   selector: 'app-codeword',
@@ -17,7 +16,6 @@ export class CodewordComponent implements OnInit {
 
   public width: number = 15;
   public height: number = 15;
-  public gameId: string;
   
   public game: CodewordGame;
 
@@ -26,37 +24,34 @@ export class CodewordComponent implements OnInit {
   public events = new Array<string>();
 
   constructor(
-    private webSocketService: WebSocketService,
-    private router: Router,
-    private route: ActivatedRoute
+    private gameProvider: CodewordGameProvider,
+    private webSocketService: WebSocketService
   ) {
   }
 
-  public newGame(): void {
-    const newGame = new NewGame();
-    newGame.width = this.width;
-    newGame.height = this.height;
-    this.webSocketService.sendMessage(newGame);
-  }
-
   public ngOnInit(): void {
+    this.gameProvider.thisGame$.subscribe(g => {
+      console.log("new codeword game", g);
+      this.game = (<any>g);
+    });
+
     this.webSocketService.message$
       .subscribe(message => {
         if (message.type === "NewGameCreated") {
-          const newGame = (<NewGameCreated>message).game;
-          if (newGame.type === "codeword") {
-            this.game = newGame as CodewordGame;
-          }
+          // const newGame = (<NewGameCreated>message).game;
+          // if (newGame.type === "codeword") {
+          //   this.game = newGame as CodewordGame;
+          // }
           // this.router.navigate(['game', newGameCreated.game.id], { relativeTo: this.route });
         } else if (message.type === "PlayerJoinedGame") {
-          this.game.players.push((<PlayerJoinedGame>message).player);
+          // this.game.players.push((<PlayerJoinedGame>message).player);
 
-          this.events.unshift(`Player ${(<PlayerJoinedGame>message).player.name} joined the game!`);
+          // this.events.unshift(`Player ${(<PlayerJoinedGame>message).player.name} joined the game!`);
         } else if (message.type === "JoinGameSucceeded") {
-          const game = (<JoinGameSucceeded>message).game;
-          if (game.type === "codeword") {
-            this.game = game as CodewordGame;
-          }
+          // const game = (<JoinGameSucceeded>message).game;
+          // if (game.type === "codeword") {
+          //   this.game = game as CodewordGame;
+          // }
         } else if (message.type === "CellFilled") {
           const cellFilled = message as CellFilled;
           this.game.grid[cellFilled.x][cellFilled.y].playerValue = cellFilled.value;
@@ -81,12 +76,6 @@ export class CodewordComponent implements OnInit {
           console.log("[WordHighlighted]", wordHighlighted);
         }
       });
-  }
-
-  public joinGame(): void {
-    const joinGame = new JoinGame();
-    joinGame.gameId = this.gameId;
-    this.webSocketService.sendMessage(joinGame);
   }
 
   public selectCharacter(character: string): void {

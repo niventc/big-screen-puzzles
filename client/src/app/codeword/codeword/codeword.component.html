@@ -1,51 +1,53 @@
-<div id="title">
-    <h1>
-        <a [routerLink]="['/']">big-screen-puzzles</a> / codeword
-    </h1>
-</div>
-
-<div class="well">
-    <input type="number" matInput [(ngModel)]="width" placeholder="Width">
-    x
-    <input type="number" matInput [(ngModel)]="height" placeholder="Height">
-    <button (click)="newGame()">Start New Game</button>
-</div>
-
-<div class="well">
-    <input type="text" matInput [(ngModel)]="gameId" placeholder="Game Id">
-    <button (click)="joinGame()">Join Game</button>
-</div>
-
-<router-outlet></router-outlet>
 
 {{game?.id}}
 
-<div style="display: flex" *ngIf="game">
-    <div class="grid" [ngStyle]="{ 'width': (width * 32) + 'px' }">
-        <div class="row" *ngFor="let row of game.grid; index as rowIndex" style="display: flex; width: 100%">
-            <div *ngFor="let cell of row; index as columnIndex" 
-                class="cell"
-                [ngClass]="{ 'blank': cell.isEmpty }"
-                style="flex: 0 0 32px; position: relative;"
-                (click)="updateCell(rowIndex, columnIndex, selectedCharacter)">
-                    <ng-container *ngIf="!cell.isEmpty">
-                        <input type="text" 
-                               class="input-cell" 
-                               maxlength="1" 
-                               [style.backgroundColor]="getCellBackgroundColour(cell)"                                
-                               (keyup)="updateCell(rowIndex, columnIndex, $event.key)"
-                               [value]="reveal ? cell.value : (cell.playerValue ? cell.playerValue : '')">  
-                        <span style="font-size: 8px; position: absolute; top: 1px; left: 1px">{{cell.key}}</span>   
-                    </ng-container>
+<div style="display: flex">
+    <div style="display: flex; flex-direction: column;">
+        <div class="grid" [ngStyle]="{ 'width': (width * 32) + 'px' }">
+            <div class="row" *ngFor="let row of game?.grid; index as rowIndex" style="display: flex; width: 100%">
+                <div *ngFor="let cell of row; index as columnIndex" 
+                    class="cell"
+                    [ngClass]="{ 'blank': cell.isEmpty }"
+                    style="flex: 0 0 32px; position: relative;"
+                    (click)="updateCell(rowIndex, columnIndex, selectedCharacter)">
+                        <ng-container *ngIf="!cell.isEmpty">
+                            <input type="text" 
+                                class="input-cell" 
+                                maxlength="1" 
+                                [style.backgroundColor]="getCellBackgroundColour(cell)"                                
+                                (keyup)="updateCell(rowIndex, columnIndex, $event.key)"
+                                [value]="reveal ? cell.value : (cell.playerValue ? cell.playerValue : '')">  
+                            <span style="font-size: 8px; position: absolute; top: 1px; left: 1px">{{cell.key}}</span>   
+                        </ng-container>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h1>Key</h1>        
+            <div class="row" style="display: flex; width: 416px; flex-flow: row; flex-wrap: wrap;">
+                <div *ngFor="let key of game?.key" 
+                    style="position: relative;"
+                    (click)="updateKey(key, selectedCharacter)">
+                    <input type="text" 
+                        class="input-cell" 
+                        maxlength="1" 
+                        style="flex: 0 0 26px;"
+                        [readonly]="key.isLocked"
+                        [style.fontWeight]="key.isLocked ? 'bold' : 'normal'"
+                        (keyup)="updateKey(key, $event.key)"
+                        [value]="reveal ? key.value : (key.playerValue ? key.playerValue : (key.isLocked ? key.value : ''))">  
+                    <span class="key">{{key.key}}</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <div style="flex: 1 1 auto; color: white">
+    <div style="flex: 1 1 auto; color: white; padding: 0 50px">
         <h1>Control</h1>
         <button (click)="reveal = !reveal">Toggle Reveal</button>
         <button [ngClass]="{ 'selected': 'clear' === selectedCharacter }" (click)="selectCharacter('clear')">Clear Cell</button>
-        <div class="row" style="display: flex; width: 416px; flex-flow: row; flex-wrap: wrap;">
+        <div class="row" style="display: flex; width: 64px; flex-flow: row; flex-wrap: wrap;">
             <button style="flex: 0 0 32px; height: 32px" 
                     *ngFor="let char of characters" 
                     [ngClass]="{ 'selected': char === selectedCharacter }" 
@@ -54,22 +56,7 @@
             </button>
         </div>
 
-        <h1>Key</h1>        
-        <div class="row" style="display: flex; width: 416px; flex-flow: row; flex-wrap: wrap;">
-            <div *ngFor="let key of game.key" 
-                 style="position: relative;"
-                 (click)="updateKey(key, selectedCharacter)">
-                <input type="text" 
-                       class="input-cell" 
-                       maxlength="1" 
-                       style="flex: 0 0 26px;"
-                       [readonly]="key.isLocked"
-                       [style.fontWeight]="key.isLocked ? 'bold' : 'normal'"
-                       (keyup)="updateKey(key, $event.key)"
-                       [value]="reveal ? key.value : (key.playerValue ? key.playerValue : (key.isLocked ? key.value : ''))">  
-                <span class="key">{{key.key}}</span>
-            </div>
-        </div>
+        
     </div>
 
     <div style="flex: 1 1 auto; color: white">

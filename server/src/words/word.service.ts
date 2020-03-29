@@ -169,7 +169,7 @@ export class WordService {
         return `Unable to find '${search}'`;
     }
 
-    public getRandomWord(type?: WordType): string {
+    public getRandomWord(type?: WordType, maxLength?: number): string {
         if (!type) {
             type = this.types[Math.round(Math.random() * 4)];
         }
@@ -187,7 +187,9 @@ export class WordService {
 
                     // Exclude numbers/symbols
                     if (word && word.word.match("^[a-zA-Z]*$")) {
-                        return word.word;
+                        if (!maxLength || word.word.length <= maxLength) {
+                            return word.word;
+                        }
                     }
                 }                
             }

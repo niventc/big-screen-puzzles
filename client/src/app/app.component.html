@@ -1,4 +1,84 @@
+
+
+<div id="navbar" *ngIf="!isHomePage">
+
+    <div id="navbar-logo">
+
+    </div>
+    <div id="navbar-title">
+        BIGSCREEN<span class="games">puzzles</span>
+    </div>
+
+</div>
+
 <app-user></app-user>
 
-<router-outlet>
-</router-outlet>
+<div id="logo-wrapper" *ngIf="isHomePage">
+    <div id="logo">
+    </div>
+    <!-- <p>CHILL
+    WAVE</p>
+    <p class="games">games</p> -->
+    <p>BIG
+    SCREEN</p>
+    <p class="games">puzzles</p>
+</div>
+
+<div id="game-container" *ngIf="!isHomePage">
+
+    <router-outlet>
+    </router-outlet>
+
+</div>
+
+
+<div style="position: absolute; bottom: 0; width: 100%;">
+    <div id="menu" style="display: flex; flex-direction: row; justify-content: center;">
+        <!-- <div class="game-tile">
+            New Session
+        </div>
+        <div class="game-tile">
+            Join Session
+        </div> -->
+        <div class="game-tile" *ngIf="!showJoin" (click)="showGames = true">
+            <!-- <div class="char">N</div> -->
+            New Game
+        </div>
+        <ng-container *ngIf="showGames">
+            <ng-container *ngFor="let game of games">
+                <div class="game-tile" *ngIf="!selectedGame || game === selectedGame" (click)="selectedGame = game">
+                    {{game}}
+                </div>
+            </ng-container>
+        </ng-container>
+
+        <div class="game-tile" *ngIf="selectedGame">
+            <select style="height: 100%; width: 100%" [(ngModel)]="selectedOptions">
+                <option *ngFor="let option of getOptions(selectedGame)" [ngValue]="option">
+                    {{option | json}}
+                    <!-- <span *ngIf="option.numberOfMines"> {{option.numberOfMines}} mines</span> -->
+                </option>
+            </select>
+        </div>
+
+        <div class="game-tile" *ngIf="selectedGame" (click)="newGame(selectedGame)">
+            &#8629; Start
+        </div>
+    
+        <div class="game-tile" *ngIf="!showGames" (click)="showJoin = true">
+            <!-- <div class="char">J</div> -->
+            Join Game
+        </div>    
+        <div class="game-tile" style="width: 300px; flex-basis: 300px" *ngIf="showJoin" (click)="showJoin = true">
+            <input type="text" placeholder="Enter game code" [(ngModel)]="gameCode">
+        </div>
+    
+        <div class="game-tile" *ngIf="showJoin" (click)="joinGame(gameCode)">
+            &#8629; Join
+        </div>
+        <div class="game-tile" *ngIf="showGames || showJoin" (click)="selectedGame ? selectedGame = undefined : showGames = false; showJoin = false">
+            &#8592; Back
+        </div>
+    </div>
+    
+</div>

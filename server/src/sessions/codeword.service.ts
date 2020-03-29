@@ -71,9 +71,9 @@ export class CodeWordService {
 
     public generateGameId(): string {
         return [
-            this.wordService.getRandomWord("adv"),
-            this.wordService.getRandomWord("verb"),
-            this.wordService.getRandomWord("adj"),
+            this.wordService.getRandomWord("adv", 6),
+            this.wordService.getRandomWord("verb", 6),
+            this.wordService.getRandomWord("adj", 6),
             // this.wordService.getRandomWord("noun")
         ].join("-").toLowerCase();
     }

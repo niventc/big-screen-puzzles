@@ -5,13 +5,12 @@ import { MinesweeperComponent } from './minesweeper.component';
 const routes: Routes = [
   {
     path: 'minesweeper',
-    component: MinesweeperComponent,
-    // children: [
-    //   {
-    //     path: 'game/:gameId',
-    //     component: GameComponent
-    //   }
-    // ]
+    children: [
+      {
+        path: ':gameId',
+        component: MinesweeperComponent
+      }
+    ]
   }
 ];
 

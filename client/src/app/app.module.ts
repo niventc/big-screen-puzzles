@@ -12,6 +12,7 @@ import { UserComponent } from './user/user.component';
 import { UserService } from './user/user.service';
 import { FormsModule } from '@angular/forms';
 import { MinesweeperModule } from './minesweeper/minesweeper.module';
+import { GameService } from './game.service';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { MinesweeperModule } from './minesweeper/minesweeper.module';
     SessionsModule
   ],
   providers: [
+    GameService,
     WebSocketService,
     UserService
   ],

@@ -1,20 +1,3 @@
-<div id="title">
-    <h1>
-        <a [routerLink]="['/']">big-screen-puzzles</a> / minesweeper
-    </h1>
-</div>
-
-<select [(ngModel)]="selectedDifficulty">
-    <option *ngFor="let difficulty of difficulties" [ngValue]="difficulty">
-        {{difficulty.name}} {{difficulty.width + 'x' + difficulty.height + '(' + difficulty.numberOfMines + 'mines)'}}
-    </option>
-</select>
-<button (click)="newGame()">New Game</button>
-
-<div class="well">
-    <input type="text" matInput [(ngModel)]="gameId" placeholder="Game Id">
-    <button (click)="joinGame()">Join Game</button>
-</div>
 
 {{game?.id}}
 
@@ -31,7 +14,6 @@
         {{cell.isSelected ? (cell.isFlag ? 'F' : (cell.isMine ? 'X' : (cell.touchingMineCount === 0 ? '' : cell.touchingMineCount))) : ((revealMines || this.isGameOver) && cell.isMine ? 'X' : '')}}
     </div>
 </div>
-
 
 <div>
     <players></players>

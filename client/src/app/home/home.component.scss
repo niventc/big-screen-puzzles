@@ -15,22 +15,92 @@
     }
 }
 
+// #menu {
+
+//     .game-tile {
+//         color: white;
+//         width: 150px;
+//         height: 200px;
+//         background: rgb(185,154,246);
+//         background: radial-gradient(circle, rgba(185,154,246,1) 35%, rgba(150,73,244,1) 80%, rgba(119,33,223,1) 100%);
+//         border-radius: 4px;
+//         text-align: center;
+//         text-transform: uppercase;
+//         font-size: 20px;
+//         padding: 12px;
+//         display: flex;
+//         align-items: top;
+//         box-shadow: 2px 2px 3px rgba(255,255,255,0.2), -2px -2px 4px rgba(0,0,0,0.4);
+
+//         a,
+//         a:hover,
+//         a:focus,
+//         a:visited {
+//             color: white;
+//             background-color: rgb(197,173,244);
+//             // text-shadow: 2px 2px 3px rgba(197,173,244, 0.5);
+//             text-decoration: none;
+//             background-clip: text;
+//         }
+//     }
+// }
+
 #menu {
 
-    div {
+    .game-tile {
+        position: relative;
         color: white;
-        width: 300px;
-        height: 300px;
-        background-color: #222;
-        border-radius: 24px;
-        text-align: center;
-        vertical-align: center;
+        width: 150px;
+        height: 150px;
+        flex: 0 0 150px;
+        background: #222;
+        border-radius: 8px;
+        text-align: right;
+        text-transform: uppercase;
+        font-size: 20px;
+        padding: 12px;
+        margin: 48px 12px;
+        display: flex;
+        align-items: flex-end; // vertical
+        justify-content: flex-end;
+        border: 1px solid white;
+        box-shadow: 1px 1px 5px white, -1px -1px 5px white;
+        font-family: Futura Light;
+        cursor: pointer;
+
+        &:hover {
+            box-shadow: 1px 1px 5px magenta, -1px -1px 5px magenta;
+        }
+
+        .char {
+            position: absolute;
+            top: 12px;
+            left: 24px;
+            font-size: 40px;
+        }
+
+        input {
+            outline: none;
+            border: none;
+            border-bottom: 1px solid white;
+            font-size: 20px;
+            caret-color: white;
+            background-color: transparent;
+            color: white;
+            text-transform: uppercase;
+            font-family: Futura Lt;
+            width: 100%;
+        }
 
         a,
         a:hover,
         a:focus,
         a:visited {
             color: white;
+            background-color: rgb(197,173,244);
+            // text-shadow: 2px 2px 3px rgba(197,173,244, 0.5);
+            text-decoration: none;
+            background-clip: text;
         }
     }
 }

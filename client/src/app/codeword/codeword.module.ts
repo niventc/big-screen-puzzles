@@ -6,6 +6,8 @@ import { CodewordComponent } from './codeword/codeword.component';
 import { SessionsModule } from '../sessions/sessions.module';
 import { CodeWordRoutingModule } from './codeword-routing.module';
 import { SharedModule } from '../shared/shared.module';
+import { GameProvider } from '../game.service';
+import { CodewordGameProvider } from './codeword.game-provider';
 
 
 
@@ -17,6 +19,10 @@ import { SharedModule } from '../shared/shared.module';
     SessionsModule,
     CodeWordRoutingModule,
     SharedModule
+  ],
+  providers: [
+    CodewordGameProvider,
+    { provide: GameProvider, useExisting: CodewordGameProvider, multi: true }
   ]
 })
 export class CodewordModule { }

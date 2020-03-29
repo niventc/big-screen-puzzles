@@ -6,3 +6,4 @@ export * from './src/minesweeper';
 
 export * from './src/player';
 export * from './src/game';
+export * from './src/options';

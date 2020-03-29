@@ -11,6 +11,9 @@ export class HomeComponent implements OnInit {
     'codeword',
     'minesweeper'
   ];
+
+  public showGames = false;
+  public showJoin = false;
   
   constructor() { }
 

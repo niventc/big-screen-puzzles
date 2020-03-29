@@ -1,11 +1,30 @@
-<div id="title">
-    <h1>
-        big-screen-puzzles
-    </h1>
-</div>
 
-<div id="menu" style="display: flex; flex-direction: row">
-    <div *ngFor="let game of games" style="flex: 0 0 300px; margin: 24px">
-        <a [routerLink]="game">{{game}}</a>
+<div id="menu" style="display: flex; flex-direction: row; justify-content: center;">
+    <!-- <div class="game-tile">
+        New Session
+    </div>
+    <div class="game-tile">
+        Join Session
+    </div> -->
+    <div class="game-tile" *ngIf="!showJoin" (click)="showGames = true">
+        <!-- <div class="char">N</div> -->
+        New Game
+    </div>
+    <ng-container *ngIf="showGames">
+        <div class="game-tile" *ngFor="let game of games">
+            <a [routerLink]="[{ outlets: { game: game } }]">{{game}}</a>
+        </div>
+    </ng-container>
+
+    <div class="game-tile" *ngIf="!showGames" (click)="showJoin = true">
+        <!-- <div class="char">J</div> -->
+        Join Game
+    </div>    
+    <div class="game-tile" style="width: 500px; flex-basis: 500px" *ngIf="showJoin" (click)="showJoin = true">
+        <input type="text" placeholder="Enter game code">
+    </div>
+
+    <div class="game-tile" *ngIf="showGames || showJoin" (click)="showGames = false; showJoin = false">
+        &#8592; Back
     </div>
 </div>

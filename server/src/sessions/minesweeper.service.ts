@@ -58,7 +58,8 @@ export class MinesweeperService {
             }  
         }
 
-        console.log("Generated minesweeper grid", grid);
+        console.log("Generated minesweeper grid");
+        this.prettyPrintGrid(grid);
         return grid;
     }
 
@@ -106,11 +107,11 @@ export class MinesweeperService {
         neighbouringCells
             .filter(c => !!c)
             .forEach(c => {
-                if (c.isMine) {
+                if (c.isMine || c.isSelected) {
                     // do nothing
                 } else if (c.touchingMineCount === 0) {
-                    moreNeighbouringCells.push(...this.getNeighboursUpToMine(grid, c.x, c.y, seen));
                     moreNeighbouringCells.push(c);
+                    moreNeighbouringCells.push(...this.getNeighboursUpToMine(grid, c.x, c.y, seen));
                 } else  {
                     moreNeighbouringCells.push(c);
                 }
@@ -144,6 +145,10 @@ export class MinesweeperService {
         } catch {
             return undefined;
         }
+    }
+    
+    private prettyPrintGrid(grid: Array<Array<MinesweeperCell>>): void {
+        console.log(grid.map(row => row.map(cell => cell.isMine ? 'X' : (cell.touchingMineCount === 0 ? ' ' : cell.touchingMineCount)).join(",")).join("\r\n"));
     }
 
 }

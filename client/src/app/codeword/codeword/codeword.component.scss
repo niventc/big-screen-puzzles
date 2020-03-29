@@ -1,24 +1,6 @@
-#title {
-    padding: 6px;
-
-    h1 {
-        color: white;
-        font-family: 'terminal', 'consolas';
-        font-size: 3em;
-        margin: 0;
-    }
-    
-    a,
-    a:hover,
-    a:focus,
-    a:visited {
-        color: white;
-    }
-}
 
 .grid {
-    padding: 50px;
-
+    
     .row {
         height: 32px; 
         
@@ -58,12 +40,4 @@ button.selected {
     top: 2px; 
     left: 2px;
     color: black;
-}
-
-.well {
-    background-color: #222;
-    color: white;
-    padding: 16px;
-    border-radius: 24px;
-    display: inline-block;
 }

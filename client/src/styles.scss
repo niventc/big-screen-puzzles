@@ -6,3 +6,13 @@ html, body {
     background-color: #333;
     font-family: sans-serif;
 }
+
+@font-face {
+    font-family: 'Futura Lt';
+    src: url('./assets/FuturaBT-Light.eot');
+    src: url('./assets/FuturaBT-Light.woff2') format('woff2'),
+        url('./assets/FuturaBT-Light.woff') format('woff'),
+        url('./assets/FuturaBT-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}

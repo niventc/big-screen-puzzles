@@ -5,13 +5,12 @@ import { CodewordComponent } from './codeword/codeword.component';
 const routes: Routes = [
   {
     path: 'codeword',
-    component: CodewordComponent,
-    // children: [
-    //   {
-    //     path: 'game/:gameId',
-    //     component: GameComponent
-    //   }
-    // ]
+    children: [
+      {
+        path: ':gameId',
+        component: CodewordComponent
+      }
+    ]
   }
 ];
 
