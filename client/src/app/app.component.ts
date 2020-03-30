@@ -20,6 +20,7 @@ export class AppComponent {
 
   public showGames = false;
   public showJoin = false;
+  public gameCode: string;
 
   public isHomePage = false;
 
