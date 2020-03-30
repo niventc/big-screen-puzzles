@@ -3,11 +3,12 @@ import { Router } from 'express-ws';
 import { WebsocketRequestHandler } from 'express-ws';
 
 import { WebSocketController } from 'src/server';
-import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game, PlayerJoinedGame, JoinGameSucceeded, FillCell, CellFilled, FillKey, KeyFilled, UpdatePlayer, PlayerUpdated, HighlightWord, WordHighlighted, NewMinesweeperGame, MinesweeperGameCreated, SelectMinesweeperCell, MinesweeperCellSelected, MinesweeperGame, CodewordGame, Message, GameOver } from 'big-screen-puzzles-contract';
+import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game, PlayerJoinedGame, JoinGameSucceeded, FillCell, CellFilled, FillKey, KeyFilled, UpdatePlayer, PlayerUpdated, HighlightWord, WordHighlighted, SelectMinesweeperCell, MinesweeperCellSelected, MinesweeperGame, CodewordGame, Message, GameOver, MinesweeperOptions, CodewordOptions, SudokuOptions } from 'big-screen-puzzles-contract';
 import { ClientService, WebSocketClient } from 'src/client.service';
 import { WordService } from 'src/words/word.service';
 import { CodeWordService } from './codeword.service';
 import { MinesweeperService } from './minesweeper.service';
+import { SudokuService } from './sudoku.service';
 
 export class SessionController implements WebSocketController {
 
@@ -17,6 +18,7 @@ export class SessionController implements WebSocketController {
 
     private codeWordService: CodeWordService;
     private minesweeperService: MinesweeperService;
+    private sudokuService: SudokuService;
 
     constructor(
         private clientService: ClientService,
@@ -24,6 +26,7 @@ export class SessionController implements WebSocketController {
     ) {
         this.codeWordService = new CodeWordService(wordService);
         this.minesweeperService = new MinesweeperService();
+        this.sudokuService = new SudokuService();
     }
 
     public setup(router: Router): void {
@@ -60,12 +63,6 @@ export class SessionController implements WebSocketController {
                     break;
 
                 // Minesweeper
-                case NewMinesweeperGame:
-                    const newMinesweeperGame = parsedMessaged as NewMinesweeperGame;
-                    console.log("new minesweeper game", newMinesweeperGame);
-                    this.newMinesweeperGame(newMinesweeperGame, <WebSocketClient><unknown>ws);
-                    break;
-
                 case SelectMinesweeperCell:
                     const selectMinesweeperCell = parsedMessaged as SelectMinesweeperCell;
                     console.log("select minesweeper cell", selectMinesweeperCell);
@@ -77,7 +74,13 @@ export class SessionController implements WebSocketController {
                 case NewGame:
                     const newGame = parsedMessaged as NewGame;
                     console.log("new game", newGame);
-                    this.newGame(newGame, <WebSocketClient><unknown>ws);
+                    if (newGame.gameType === "codeword") {
+                        this.newGame(newGame, <WebSocketClient><unknown>ws);
+                    } else if (newGame.gameType === "minesweeper") {                        
+                        this.newMinesweeperGame(newGame, <WebSocketClient><unknown>ws);
+                    } else if (newGame.gameType === "sudoku") {
+                        this.newSudokuGame(newGame, <WebSocketClient><unknown>ws);
+                    }
                     break;
 
                 case FillCell:
@@ -122,15 +125,32 @@ export class SessionController implements WebSocketController {
             });
     }
 
-    private newMinesweeperGame(message: NewMinesweeperGame, ws: WebSocketClient): void {
+    private newSudokuGame(message: NewGame, ws: WebSocketClient): void {
         const player = this.clientService.getPlayer(ws.uuid);
-        const game = this.minesweeperService.generateGame(message.options);
+        const game = this.sudokuService.generateGame(message.options as SudokuOptions);
         game.id = this.codeWordService.generateGameId();
         game.players = [player];
 
         this.games.set(game.id, game);
 
-        const newGameCreated = new NewGameCreated();;
+        const newGameCreated = new NewGameCreated();
+        newGameCreated.game = game;
+        ws.send(JSON.stringify(newGameCreated));
+
+        const playerJoinedGame = new PlayerJoinedGame();
+        playerJoinedGame.player = player;
+        ws.send(JSON.stringify(playerJoinedGame));
+    }
+
+    private newMinesweeperGame(message: NewGame, ws: WebSocketClient): void {
+        const player = this.clientService.getPlayer(ws.uuid);
+        const game = this.minesweeperService.generateGame(message.options as MinesweeperOptions);
+        game.id = this.codeWordService.generateGameId();
+        game.players = [player];
+
+        this.games.set(game.id, game);
+
+        const newGameCreated = new NewGameCreated();
         newGameCreated.game = game;
         ws.send(JSON.stringify(newGameCreated));
 
@@ -187,7 +207,7 @@ export class SessionController implements WebSocketController {
     }
 
     private newGame(newGame: NewGame, ws: WebSocketClient): void {
-        const game = this.codeWordService.generateGame(newGame.width, newGame.height);
+        const game = this.codeWordService.generateGame(newGame.options as CodewordOptions);
         const player = this.clientService.getPlayer(ws.uuid);
         game.players = [player];
         this.games.set(game.id, game);

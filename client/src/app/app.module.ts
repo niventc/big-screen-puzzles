@@ -13,6 +13,7 @@ import { UserService } from './user/user.service';
 import { FormsModule } from '@angular/forms';
 import { MinesweeperModule } from './minesweeper/minesweeper.module';
 import { GameService } from './game.service';
+import { SudokuModule } from './sudoku/sudoku.module';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { GameService } from './game.service';
     FormsModule,
     CodewordModule,
     MinesweeperModule,
-    SessionsModule
+    SessionsModule,
+    SudokuModule
   ],
   providers: [
     GameService,

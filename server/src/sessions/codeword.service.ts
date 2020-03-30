@@ -1,5 +1,5 @@
 import { WordService } from 'src/words/word.service';
-import { Cell, Key, CodewordGame } from 'big-screen-puzzles-contract';
+import { Cell, Key, CodewordGame, CodewordOptions } from 'big-screen-puzzles-contract';
 import { Word } from 'big-screen-puzzles-contract/src/codeword/word';
 
 export class CodeWordService {
@@ -37,9 +37,9 @@ export class CodeWordService {
         return missingCharacters.length > 0 ? [`[${missingCharacters.join('')}]`] : ['[a-z]'];
     }
 
-    public generateGame(width: number, height: number): CodewordGame {
+    public generateGame(options: CodewordOptions): CodewordGame {
         const key = this.generateKey();
-        const grid = this.generateGrid(width, height, key);
+        const grid = this.generateGrid(options.width, options.height, key);
         const words = this.words.map(w => {
             const word = new Word();
             word.value = w;

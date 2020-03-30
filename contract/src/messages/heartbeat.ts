@@ -1,6 +1,7 @@
 import { Message } from './message';
 import { Player } from '../player';
 import { Game } from '../game';
+import { Options } from '../options';
 
 export class Heartbeat extends Message {    
     constructor() {
@@ -60,8 +61,8 @@ export class UpdatePlayer extends Message {
 }
 
 export class NewGame extends Message {
-    public width: number;
-    public height: number;
+    public gameType: string;
+    public options: Options;
 
     constructor() {
         super("NewGame");

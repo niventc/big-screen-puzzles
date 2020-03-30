@@ -1,5 +1,5 @@
 import { Message, Heartbeat, NewGame, JoinGame, PlayerConnected, NewGameCreated, JoinGameSucceeded, PlayerJoinedGame, PlayerUpdated, UpdatePlayer, GameOver } from './messages';
-import { NewMinesweeperGame, SelectMinesweeperCell, MinesweeperCellSelected } from './minesweeper/messages';
+import { SelectMinesweeperCell, MinesweeperCellSelected } from './minesweeper/messages';
 import { CellFilled, KeyFilled, WordHighlighted, FillCell, FillKey, HighlightWord } from './codeword/messages';
 
 export class Parser {
@@ -49,8 +49,6 @@ export class Parser {
             case "JoinGame":
                 return Object.assign(new JoinGame(), typedMessage);
                 
-            case "NewMinesweeperGame":
-                return Object.assign(new NewMinesweeperGame(), typedMessage);
             case "SelectMinesweeperCell":
                 return Object.assign(new SelectMinesweeperCell(), typedMessage);
                 

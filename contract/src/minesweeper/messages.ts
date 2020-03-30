@@ -1,15 +1,6 @@
 import { Message } from '../messages/message';
 import { Player } from '../player';
-import { MinesweeperOptions } from './options';
 import { MinesweeperGame } from './game';
-
-export class NewMinesweeperGame extends Message {
-    public options: MinesweeperOptions;
-    
-    constructor() {
-        super("NewMinesweeperGame");
-    }
-}
 
 export class MinesweeperGameCreated extends Message {
     public game: MinesweeperGame;

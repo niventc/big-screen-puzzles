@@ -15,7 +15,8 @@ export class AppComponent {
 
   public games: string[] = [
     'codeword',
-    'minesweeper'
+    'minesweeper',
+    'sudoku'
   ];
 
   public showGames = false;

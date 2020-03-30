@@ -1,6 +1,6 @@
 import { GameProvider } from '../game.service';
 import { Injectable } from '@angular/core';
-import { MinesweeperGame, NewMinesweeperGame, MinesweeperOptions } from 'big-screen-puzzles-contract';
+import { MinesweeperGame, MinesweeperOptions, NewGame } from 'big-screen-puzzles-contract';
 import { WebSocketService } from '../websocket.service';
 
 @Injectable({
@@ -56,7 +56,8 @@ export class MinesweeperGameProvider extends GameProvider {
     }
     
     public newGame(options: MinesweeperOptions): void {
-        const newGame = new NewMinesweeperGame();
+        const newGame = new NewGame();
+        newGame.gameType = "minesweeper";
         newGame.options = options;
         this.webSocketService.sendMessage(newGame);
     }

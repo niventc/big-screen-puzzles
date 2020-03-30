@@ -1,0 +1,35 @@
+
+.grid {
+    
+    .row {
+        height: 32px; 
+
+        &:nth-child(3n + 3) {
+            border-bottom: 2px solid red;
+        }
+        
+        .cell {
+            text-align: center;
+            text-transform: uppercase;
+            background-color: white;
+
+            &:nth-child(3n + 3) {
+                border-right: 2px solid red;
+            }
+
+            &.highlighted input {
+                background-color: yellow;
+            }
+        }
+    }
+}
+
+.input-cell {
+    text-transform: uppercase;
+    text-align: center;
+    padding: 1px;
+    height: 28px;
+    width: 28px;
+    border: 1px solid black;
+    outline: none;
+}

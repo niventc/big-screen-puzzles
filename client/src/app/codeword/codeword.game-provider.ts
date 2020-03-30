@@ -39,8 +39,8 @@ export class CodewordGameProvider extends GameProvider {
 
     public newGame(options: CodewordOptions): void {
         const newGame = new NewGame();
-        newGame.width = options.width;
-        newGame.height = options.height;
+        newGame.gameType = "codeword";
+        newGame.options = options;
         this.webSocketService.sendMessage(newGame);
     }
 
