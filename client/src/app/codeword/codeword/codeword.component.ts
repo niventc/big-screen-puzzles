@@ -46,18 +46,20 @@ export class CodewordComponent implements OnInit {
           this.game.grid[cellFilled.x][cellFilled.y].playerValue = cellFilled.value as string;
 
           if (cellFilled.value) {
-            this.events.unshift(`Player ${cellFilled.byPlayer.name} filled ${cellFilled.x},${cellFilled.y} with ${cellFilled.value}!`);
+            this.events.unshift(`${cellFilled.byPlayer.name} placed a ${cellFilled.value}!`);
           } else {
-            this.events.unshift(`Player ${cellFilled.byPlayer.name} cleared ${cellFilled.x},${cellFilled.y}!`);
+            this.events.unshift(`${cellFilled.byPlayer.name} cleared a cell!`);
           }
+
+          this.checkIfWordRevealed(cellFilled);
         } else if (message.type === "KeyFilled") {
           const keyFilled = message as KeyFilled;
           this.game.key.find(k => k.key === keyFilled.key).playerValue = keyFilled.value;
 
           if (keyFilled.value) {
-            this.events.unshift(`Player ${keyFilled.byPlayer.name} thinks ${keyFilled.key} is ${keyFilled.value}!`);
+            this.events.unshift(`${keyFilled.byPlayer.name} thinks ${keyFilled.key} is ${keyFilled.value}!`);
           } else {
-            this.events.unshift(`Player ${keyFilled.byPlayer.name} cleared key ${keyFilled.key}!`);
+            this.events.unshift(`${keyFilled.byPlayer.name} cleared key ${keyFilled.key}!`);
           }          
         } else if (message.type === "WordHighlighted") {
           const wordHighlighted = message as WordHighlighted;
@@ -65,6 +67,27 @@ export class CodewordComponent implements OnInit {
           console.log("[WordHighlighted]", wordHighlighted);
         }
       });
+  }
+
+  public checkIfWordRevealed(cellFilled: CellFilled): void {
+    const words = this.game.grid[cellFilled.x][cellFilled.y].words;
+
+    for (let word of words) {
+      let allLetters = true;
+      for (let x = 0; x < this.game.grid.length; x++) {
+        for (let y = 0; y < this.game.grid[0].length; y++) {
+          const cell = this.game.grid[x][y];
+          if (cell.words.includes(word) && cell.value !== cell.playerValue) {
+            allLetters = false;
+          }
+        }
+      }
+      
+      if (allLetters) {
+        const definition = this.game.words.find(w => w.value === word);
+        this.events.unshift(`${cellFilled.byPlayer.name} uncovered '${word}' which means '${definition.definition}'!`);
+      }
+    }
   }
 
   public selectCharacter(character: string): void {
