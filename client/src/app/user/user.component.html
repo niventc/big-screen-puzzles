@@ -10,6 +10,7 @@
         [cpPosition]="'bottom'"
         [cpPositionOffset]="'0%'"
         [style.color]="player.colour"
+        (colorPickerClose)="changeColour($event)"
         placeholder="Who am I?">
     <span id="circle" [ngClass]="{ 'connected': isConnected }"></span>    
 </div>

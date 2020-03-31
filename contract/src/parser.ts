@@ -1,6 +1,6 @@
-import { Message, Heartbeat, NewGame, JoinGame, PlayerConnected, NewGameCreated, JoinGameSucceeded, PlayerJoinedGame, PlayerUpdated, UpdatePlayer, GameOver } from './messages';
+import { Message, Heartbeat, NewGame, JoinGame, PlayerConnected, NewGameCreated, JoinGameSucceeded, PlayerJoinedGame, PlayerUpdated, UpdatePlayer, GameOver, CellFilled, FillCell, HighlightCell, CellHighlighted } from './messages';
 import { SelectMinesweeperCell, MinesweeperCellSelected } from './minesweeper/messages';
-import { CellFilled, KeyFilled, WordHighlighted, FillCell, FillKey, HighlightWord } from './codeword/messages';
+import { KeyFilled, WordHighlighted, FillKey, HighlightWord } from './codeword/messages';
 
 export class Parser {
 
@@ -38,6 +38,8 @@ export class Parser {
                 return Object.assign(new JoinGameSucceeded(), typedMessage);
             case "CellFilled":
                 return Object.assign(new CellFilled(), typedMessage);
+            case "CellHighlighted":
+                return Object.assign(new CellHighlighted(), typedMessage);
             case "KeyFilled":
                 return Object.assign(new KeyFilled(), typedMessage);
             case "WordHighlighted":
@@ -56,6 +58,8 @@ export class Parser {
                 return Object.assign(new NewGame(), typedMessage);
             case "FillCell":
                 return Object.assign(new FillCell(), typedMessage);
+            case "HighlightCell":
+                return Object.assign(new HighlightCell(), typedMessage);
             case "FillKey":
                 return Object.assign(new FillKey(), typedMessage);
             case "HighlightWord":

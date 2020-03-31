@@ -37,24 +37,13 @@ export class CodewordComponent implements OnInit {
 
     this.webSocketService.message$
       .subscribe(message => {
-        if (message.type === "NewGameCreated") {
-          // const newGame = (<NewGameCreated>message).game;
-          // if (newGame.type === "codeword") {
-          //   this.game = newGame as CodewordGame;
-          // }
-          // this.router.navigate(['game', newGameCreated.game.id], { relativeTo: this.route });
-        } else if (message.type === "PlayerJoinedGame") {
+        if (message.type === "PlayerJoinedGame") {
           // this.game.players.push((<PlayerJoinedGame>message).player);
 
           // this.events.unshift(`Player ${(<PlayerJoinedGame>message).player.name} joined the game!`);
-        } else if (message.type === "JoinGameSucceeded") {
-          // const game = (<JoinGameSucceeded>message).game;
-          // if (game.type === "codeword") {
-          //   this.game = game as CodewordGame;
-          // }
         } else if (message.type === "CellFilled") {
           const cellFilled = message as CellFilled;
-          this.game.grid[cellFilled.x][cellFilled.y].playerValue = cellFilled.value;
+          this.game.grid[cellFilled.x][cellFilled.y].playerValue = cellFilled.value as string;
 
           if (cellFilled.value) {
             this.events.unshift(`Player ${cellFilled.byPlayer.name} filled ${cellFilled.x},${cellFilled.y} with ${cellFilled.value}!`);

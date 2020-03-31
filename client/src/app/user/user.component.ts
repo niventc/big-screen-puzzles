@@ -44,4 +44,12 @@ export class UserComponent implements OnInit {
     this.webSocketService.sendMessage(updatePlayer);
   }
 
+  public changeColour(colour: string): void {
+    console.log("change colour");
+    const updatePlayer = new UpdatePlayer();
+    updatePlayer.name = this.player.name;
+    updatePlayer.colour = colour;
+    this.webSocketService.sendMessage(updatePlayer);
+  }
+
 }

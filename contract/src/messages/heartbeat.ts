@@ -50,6 +50,27 @@ export class PlayerJoinedGame extends Message {
     }
 }
 
+export class CellFilled extends Message {
+    public x: number;
+    public y: number;
+    public value: string | number;
+    public byPlayer: Player;
+
+    constructor() {
+        super("CellFilled");
+    }
+}
+
+export class CellHighlighted extends Message {
+    public x: number;
+    public y: number;
+    public byPlayer: Player;
+
+    constructor() {
+        super("CellHighlighted");
+    }
+}
+
 /* Commands */
 export class UpdatePlayer extends Message {
     public name?: string;
@@ -57,6 +78,27 @@ export class UpdatePlayer extends Message {
 
     constructor() {
         super("UpdatePlayer");
+    }
+}
+
+export class FillCell extends Message {
+    public gameId: string;
+    public x: number;
+    public y: number;
+    public value: string | number;
+
+    constructor() {
+        super("FillCell");
+    }
+}
+
+export class HighlightCell extends Message {
+    public gameId: string;
+    public x: number;
+    public y: number;
+
+    constructor() {
+        super("HighlightCell");
     }
 }
 

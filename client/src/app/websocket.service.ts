@@ -51,6 +51,7 @@ export class WebSocketService {
   }
 
   public sendMessage(message: Message): void {
+    console.log("sending", message);
     this.socket$.next(message);
   }
 

@@ -1,17 +1,6 @@
 import { Message } from "../messages/message";
 import { Player } from "../player";
 
-export class CellFilled extends Message {
-    public x: number;
-    public y: number;
-    public value: string;
-    public byPlayer: Player;
-
-    constructor() {
-        super("CellFilled");
-    }
-}
-
 export class KeyFilled extends Message {
     public key: number;
     public value: string;
@@ -38,17 +27,6 @@ export class FillKey extends Message {
 
     constructor() {
         super("FillKey");
-    }
-}
-
-export class FillCell extends Message {
-    public gameId: string;
-    public x: number;
-    public y: number;
-    public value: string;
-
-    constructor() {
-        super("FillCell");
     }
 }
 

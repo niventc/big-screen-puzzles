@@ -12,7 +12,7 @@
                     <input type="text" 
                         class="input-cell" 
                         maxlength="1" 
-                        [style.backgroundColor]="getCellBackgroundColour(cell)"                                
+                        [style.backgroundColor]="getCellBackgroundColour(rowIndex, columnIndex)"                                
                         (keyup)="updateCell(rowIndex, columnIndex, $event.key)"
                         [value]="reveal || cell.isLocked ? cell.value : (cell.playerValue ? cell.playerValue : '')">  
                     <!-- <span style="font-size: 8px; position: absolute; top: 1px; left: 1px">{{cell.key}}</span> -->

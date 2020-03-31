@@ -7,6 +7,8 @@ export class SudokuService {
         const game = new SudokuGame();
 
         game.grid = this.generateGrid();
+        game.startedAt = new Date(Date.now());
+        game.highlightedCells = {};
 
         let uncoveredCount = 0;
         while (uncoveredCount < options.startingUncoveredCount) {

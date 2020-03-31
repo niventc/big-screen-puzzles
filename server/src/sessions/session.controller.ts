@@ -3,7 +3,7 @@ import { Router } from 'express-ws';
 import { WebsocketRequestHandler } from 'express-ws';
 
 import { WebSocketController } from 'src/server';
-import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game, PlayerJoinedGame, JoinGameSucceeded, FillCell, CellFilled, FillKey, KeyFilled, UpdatePlayer, PlayerUpdated, HighlightWord, WordHighlighted, SelectMinesweeperCell, MinesweeperCellSelected, MinesweeperGame, CodewordGame, Message, GameOver, MinesweeperOptions, CodewordOptions, SudokuOptions } from 'big-screen-puzzles-contract';
+import { Heartbeat, Parser, JoinGame, NewGame, NewGameCreated, Game, PlayerJoinedGame, JoinGameSucceeded, FillCell, CellFilled, FillKey, KeyFilled, UpdatePlayer, PlayerUpdated, HighlightWord, WordHighlighted, SelectMinesweeperCell, MinesweeperCellSelected, MinesweeperGame, CodewordGame, Message, GameOver, MinesweeperOptions, CodewordOptions, SudokuOptions, HighlightCell, CellHighlighted, SudokuGame } from 'big-screen-puzzles-contract';
 import { ClientService, WebSocketClient } from 'src/client.service';
 import { WordService } from 'src/words/word.service';
 import { CodeWordService } from './codeword.service';
@@ -69,7 +69,6 @@ export class SessionController implements WebSocketController {
                     this.selectMinesweeperCell(selectMinesweeperCell, <WebSocketClient><unknown>ws);
                     break;
 
-
                 // Codeword
                 case NewGame:
                     const newGame = parsedMessaged as NewGame;
@@ -81,6 +80,12 @@ export class SessionController implements WebSocketController {
                     } else if (newGame.gameType === "sudoku") {
                         this.newSudokuGame(newGame, <WebSocketClient><unknown>ws);
                     }
+                    break;
+                
+                case HighlightCell:
+                    const highlightCell = parsedMessaged as HighlightCell;
+                    console.log("highlight cell", highlightCell);
+                    this.highlightCell(highlightCell, (<WebSocketClient><unknown>ws).uuid);
                     break;
 
                 case FillCell:
@@ -246,16 +251,45 @@ export class SessionController implements WebSocketController {
         this.sendMessageToPlayers(game, playerJoinedGame);
     }
 
-    private fillCell(message: FillCell, clientId: string): void {
+    private highlightCell(message: HighlightCell, clientId: string): void {
         console.log("fill cell", message);
 
-        const game = this.games.get(message.gameId) as CodewordGame;
+        let game = this.games.get(message.gameId);
         if (!game) {
             console.error(`game ${message.gameId} not found!`);
             return;
+        } else {
+            if (game.type !== "sudoku") {
+                console.error(`unable to highlight cells as ${game.type} game doesn't support it`);
+                return;
+            }
         }
 
-        game.grid[message.x][message.y].playerValue = message.value;
+        const player = this.clientService.getPlayer(clientId);
+        const cellHighlighted = new CellHighlighted();
+        cellHighlighted.x = message.x;
+        cellHighlighted.y = message.y;
+        cellHighlighted.byPlayer = player;
+        (<any>game).highlightedCells[clientId] = cellHighlighted;
+        
+        this.sendMessageToPlayers(game, cellHighlighted);    
+    }
+
+    private fillCell(message: FillCell, clientId: string): void {
+        console.log("fill cell", message);
+
+        const game = this.games.get(message.gameId);
+        if (!game) {
+            console.error(`game ${message.gameId} not found!`);
+            return;
+        } else {
+            if (!["sudoku","codeword"].includes(game.type)) {
+                console.error(`unable to fill cells as ${game.type} game doesn't support it`);
+                return;
+            }
+        }
+
+        (<any>game).grid[message.x][message.y].playerValue = message.value;
 
         const player = this.clientService.getPlayer(clientId);
         const cellFilled = new CellFilled();
