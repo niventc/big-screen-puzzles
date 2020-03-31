@@ -26,8 +26,12 @@
 
 <div id="game-container" *ngIf="!isHomePage">
 
-    <router-outlet>
-    </router-outlet>
+    <div class="game-panel">
+        <router-outlet>
+        </router-outlet>
+    </div>
+    
+    <players></players>
 
 </div>
 

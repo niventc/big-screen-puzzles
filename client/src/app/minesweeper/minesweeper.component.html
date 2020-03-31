@@ -10,11 +10,8 @@
          style="flex: 0 0 32px" 
          [style.backgroundColor]="cell.isSelected && !cell.isFlag ? cell.selectedBy.colour : ''"
          [style.color]="cell.isFlag ? cell.selectedBy.colour : ''"
-         (click)="selectCell(x, y, cell)">
+         (click)="selectCell(x, y, cell, placeFlag)"
+         (contextmenu)="selectCell(x, y, cell, true)">
         {{cell.isSelected ? (cell.isFlag ? 'F' : (cell.isMine ? 'X' : (cell.touchingMineCount === 0 ? '' : cell.touchingMineCount))) : ((revealMines || this.isGameOver) && cell.isMine ? 'X' : '')}}
     </div>
-</div>
-
-<div>
-    <players></players>
 </div>

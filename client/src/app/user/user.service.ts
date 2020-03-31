@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 export class UserService {
     
     public getClientId(): string {
-        return undefined;
+        //return undefined;
         return window.localStorage.getItem("clientId");
     }
 

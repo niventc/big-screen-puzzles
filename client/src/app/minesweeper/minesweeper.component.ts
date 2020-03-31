@@ -53,14 +53,15 @@ export class MinesweeperComponent implements OnInit {
       })
   }
   
-  public selectCell(x: number, y: number, cell: MinesweeperCell): void {
+  public selectCell(x: number, y: number, cell: MinesweeperCell, placeFlag: boolean): boolean {
     if (!this.isGameOver) {
       const selectMinesweeperCell = new SelectMinesweeperCell();
       selectMinesweeperCell.x = x;
       selectMinesweeperCell.y = y;
       selectMinesweeperCell.gameId = this.game.id;
-      selectMinesweeperCell.placeFlag = this.placeFlag;
+      selectMinesweeperCell.placeFlag = placeFlag;
       this.webSocketService.sendMessage(selectMinesweeperCell);
     }
+    return false; // stops right click propogation
   }
 }

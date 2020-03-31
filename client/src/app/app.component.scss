@@ -12,14 +12,14 @@ background: linear-gradient(0deg, rgba(6,80,77,1) 0%, rgba(11,126,121,1) 10%, rg
 }
 
 #game-container {
-    width: 1024px;
-    height: 800px;
-    margin: auto;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    .game-panel {
+        margin: 24px;
+    }
 }
 
 #logo-wrapper {

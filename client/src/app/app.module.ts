@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { MinesweeperModule } from './minesweeper/minesweeper.module';
 import { GameService } from './game.service';
 import { SudokuModule } from './sudoku/sudoku.module';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { SudokuModule } from './sudoku/sudoku.module';
     CodewordModule,
     MinesweeperModule,
     SessionsModule,
+    SharedModule,
     SudokuModule
   ],
   providers: [
