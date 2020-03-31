@@ -29,7 +29,7 @@ export class SudokuComponent implements OnInit {
       .subscribe(message => {
         if (message.type === "CellFilled") {
           const cellFilled = message as CellFilled;
-          this.game.grid[cellFilled.x][cellFilled.y].playerValue = <number><unknown>cellFilled.value;
+          this.game.grid[cellFilled.y][cellFilled.x].playerValue = <number><unknown>cellFilled.value;
 
           // if (cellFilled.value) {
           //   this.events.unshift(`Player ${cellFilled.byPlayer.name} filled ${cellFilled.x},${cellFilled.y} with ${cellFilled.value}!`);
@@ -44,7 +44,7 @@ export class SudokuComponent implements OnInit {
       });
   }
 
-  public updateCell(x: number, y: number, event: string): void {
+  public updateCell(y: number, x: number, event: string): void {
     const highlightCell = new HighlightCell();
     highlightCell.gameId = this.game.id;
     highlightCell.x = x;
@@ -80,7 +80,7 @@ export class SudokuComponent implements OnInit {
     }
   }
 
-  public getCellBackgroundColour(x: number, y: number): string {
+  public getCellBackgroundColour(y: number, x: number): string {
     if (this.game.highlightedCells) {
       const highlightedCells = Object.values(this.game.highlightedCells);
       const highlight = highlightedCells.find(h => h.x === x && h.y === y);
