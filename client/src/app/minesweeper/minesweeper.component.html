@@ -1,5 +1,5 @@
 
-{{game?.id}}
+<game-id [gameId]="game?.id"></game-id>
 
 <button (click)="revealMines = !revealMines" [style.backgroundColor]="revealMines ? 'red' : ''">Toggle Reveal Mines</button>
 <button (click)="placeFlag = !placeFlag" [style.backgroundColor]="placeFlag ? 'red' : ''">Place Flag</button>

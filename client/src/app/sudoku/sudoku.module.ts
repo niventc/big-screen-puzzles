@@ -4,12 +4,14 @@ import { SudokuComponent } from './sudoku/sudoku.component';
 import { SudokuRoutingModule } from './sudoku-routing.module';
 import { SudokuGameProvider } from './sudoku.game-provider';
 import { GameProvider } from '../game.service';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   declarations: [SudokuComponent],
   imports: [
     CommonModule,
-    SudokuRoutingModule
+    SudokuRoutingModule,
+    SharedModule
   ],
   providers: [    
     SudokuGameProvider,
