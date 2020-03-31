@@ -1,0 +1,6 @@
+<div *ngIf="gameId" style="background-color: #222; color: white; padding: 12px; border-radius: 12px;">    
+    {{gameId}}
+    <a title="Share game id on WhatsApp" style="color: #eee" [href]="'https://web.whatsapp.com/send?text=' + gameId" target="_blank" data-action="share/whatsapp/share">
+        <img src="../../assets/whatsapp-logo.png" style="width: 32px">
+    </a>
+</div>
