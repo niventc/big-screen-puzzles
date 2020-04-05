@@ -1,13 +1,13 @@
 import * as express from 'express';
 import * as expressWs from 'express-ws';
 import * as http from 'http';
-import { CosmosClient } from '@azure/cosmos';
 
 import { WordController } from './words/word.controller';
 import { WordService } from './words/word.service';
 import { SessionController } from './sessions/session.controller';
-import { ClientService } from './client.service';
+import { ClientService, WebSocketClient } from './client.service';
 import { PlayerConnected } from 'big-screen-puzzles-contract';
+import { CosmosDatabaseFactory } from './database/factory';
 
 export interface Controller {
     router: express.Router;
@@ -23,8 +23,8 @@ class Server {
 
     constructor(
         private clientService: ClientService,
-        private controllers: Controller[], 
-        private webSocketControllers: WebSocketController[], 
+        controllers: Controller[], 
+        webSocketControllers: WebSocketController[], 
         private port: number
     ) {
         const app = express();
@@ -47,20 +47,18 @@ class Server {
         });
 
         const wss = this.wsInstance.getWss();
-        wss.on('connection', (ws: WebSocket, req: http.IncomingMessage) => {
+        wss.on('connection', async (ws: WebSocket, req: http.IncomingMessage) => {
             const clientId = (<any>req).query['clientId'];
-            const player = clientService.addClient(ws, clientId);
+            const player = await this.clientService.addClient(ws, clientId);
 
             const playerConnected = new PlayerConnected();
             playerConnected.player = player;
             ws.send(JSON.stringify(playerConnected));
 
-            ws.onopen = (e) => {
-                // console.log(e);
-            }
-
-            ws.onclose = (e) => {
-                // console.log(e);
+            ws.onclose = () => {
+                const clientId = (<WebSocketClient><unknown>ws).uuid;
+                this.clientService.removeClient(clientId)
+                console.log(`Client '${clientId}' disconnected`);
             }
         })
     }
@@ -78,16 +76,14 @@ class Server {
     }
 }
 
-const cosmosClient = new CosmosClient({
-    endpoint: "https://localhost:8081",
-    key: "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="
-});
-
-const clientService = new ClientService(cosmosClient);
-const wordService = new WordService();
-new Server(
-    clientService,
-    [new WordController(wordService)], 
-    [new SessionController(clientService, wordService)], 
-    process.env.PORT ? parseInt(process.env.PORT) : 3000
-).listen();
+CosmosDatabaseFactory.setupDatabase()
+    .then(database => {
+        const clientService = new ClientService(database);
+        const wordService = new WordService();
+        new Server(
+            clientService,
+            [new WordController(wordService)], 
+            [new SessionController(clientService, wordService)], 
+            process.env.PORT ? parseInt(process.env.PORT) : 3000
+        ).listen();
+    });

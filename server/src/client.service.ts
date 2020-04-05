@@ -1,52 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
-import { CosmosClient, Container, StatusCodes } from '@azure/cosmos';
+import { Database } from '@azure/cosmos';
 import { Player } from './database/player';
+import { PlayerService } from './database/player.service';
 
 export declare class WebSocketClient extends WebSocket {
     uuid: string;
-}
-
-export class PlayerService {
-
-    private players: Container;
-
-    constructor(
-        cosmosClient: CosmosClient
-    ) {
-        const database = cosmosClient.database("bsp");
-        this.players = database.container("players");
-    }
-
-    public async getPlayer(privateId: string): Promise<Player> {
-        const player = await this.players
-            .item(privateId, "player")
-            .read<Player>();
-
-        console.log("[GetPlayer] " + player.requestCharge + "RU");
-
-        if (player.statusCode === StatusCodes.Ok) {
-            return player.resource;
-        }
-        console.error("[GetPlayer] Failed", player.statusCode);
-    }
-
-    public async createPlayer(id: string, name: string, colour: string): Promise<Player> {
-        const player = new Player();
-        player.id = id;
-        player.privateId = uuidv4();
-        player.name = name;
-        player.colour = colour;
-
-        const response = await this.players.items.create(player);
-
-        console.log("[CreatePlayer] " + response.requestCharge + "RU");
-
-        if (response.statusCode === StatusCodes.Created) {
-            return response.resource;
-        }
-        console.error("[CreatePlayer] Failed", response.statusCode);
-    }
-
 }
 
 export class ClientService {
@@ -59,17 +17,16 @@ export class ClientService {
     }
 
     private clients = new Map<string, WebSocketClient>();
-    private clientPlayers = new Map<string, Player>();
 
     private playerService: PlayerService;
 
     constructor(
-        cosmosClient: CosmosClient
+        database: Database
     ) {
-        this.playerService = new PlayerService(cosmosClient);
+        this.playerService = new PlayerService(database);
     }
 
-    public addClient(client: WebSocket, clientId: string): Player {
+    public async addClient(client: WebSocket, clientId: string): Promise<Player> {
         const webSocketClient = client as WebSocketClient;
         if (!clientId) {
             clientId = uuidv4();
@@ -77,12 +34,9 @@ export class ClientService {
         webSocketClient.uuid = clientId;
         this.clients.set(clientId, webSocketClient);
 
-        let player = this.clientPlayers.get(clientId);
+        let player = await this.playerService.getPlayer(clientId);
         if (!player) {
-            player = new Player();
-            player.id = clientId;
-            player.colour = ClientService.getRandomColor();
-            this.clientPlayers.set(clientId, player);
+            player = await this.playerService.createPlayer(clientId, null, ClientService.getRandomColor());
         }
 
         console.log(`Added client/player`, player);
@@ -93,27 +47,16 @@ export class ClientService {
         return this.clients.get(clientId);
     }
 
-    public getPlayer(clientId: string): Player {
-        return this.clientPlayers.get(clientId);
+    public async getPlayer(clientId: string): Promise<Player> {
+        return await this.playerService.getPlayer(clientId);
     }
 
     public removeClient(clientId: string): void {
         this.clients.delete(clientId);
     }
 
-    public updatePlayer(clientId: string, name?: string, colour?: string): Player {
-        let player = this.clientPlayers.get(clientId);
-        if (!player) {
-            console.error(`Unable to set name ${name} as unable to find client with id ${clientId}`);
-            return;
-        }
-        if (name) {
-            player.name = name;
-        }
-        if (colour) {
-            player.colour = colour;
-        }
-        return player;
+    public async updatePlayer(clientId: string, name?: string, colour?: string): Promise<Player> {
+        return await this.playerService.updatePlayer(clientId, name, colour);
     }
 
 }

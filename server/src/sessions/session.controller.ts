@@ -111,8 +111,8 @@ export class SessionController implements WebSocketController {
         });
     }
 
-    private updatePlayer(message: UpdatePlayer, ws: WebSocketClient): void {
-        const player = this.clientService.updatePlayer(ws.uuid, message.name, message.colour);
+    private async updatePlayer(message: UpdatePlayer, ws: WebSocketClient): Promise<void> {
+        const player = await this.clientService.updatePlayer(ws.uuid, message.name, message.colour);
 
         // Update all games the player is in, and notify other players
         Array.from(this.games.values())
@@ -130,8 +130,8 @@ export class SessionController implements WebSocketController {
             });
     }
 
-    private newSudokuGame(message: NewGame, ws: WebSocketClient): void {
-        const player = this.clientService.getPlayer(ws.uuid);
+    private async newSudokuGame(message: NewGame, ws: WebSocketClient): Promise<void> {
+        const player = await this.clientService.getPlayer(ws.uuid);
         const game = this.sudokuService.generateGame(message.options as SudokuOptions);
         game.id = this.codeWordService.generateGameId();
         game.players = [player];
@@ -147,8 +147,8 @@ export class SessionController implements WebSocketController {
         ws.send(JSON.stringify(playerJoinedGame));
     }
 
-    private newMinesweeperGame(message: NewGame, ws: WebSocketClient): void {
-        const player = this.clientService.getPlayer(ws.uuid);
+    private async newMinesweeperGame(message: NewGame, ws: WebSocketClient): Promise<void> {
+        const player = await this.clientService.getPlayer(ws.uuid);
         const game = this.minesweeperService.generateGame(message.options as MinesweeperOptions);
         game.id = this.codeWordService.generateGameId();
         game.players = [player];
@@ -164,9 +164,9 @@ export class SessionController implements WebSocketController {
         ws.send(JSON.stringify(playerJoinedGame));
     }
 
-    private selectMinesweeperCell(message: SelectMinesweeperCell, ws: WebSocketClient): void {
+    private async selectMinesweeperCell(message: SelectMinesweeperCell, ws: WebSocketClient): Promise<void> {
         const game = this.games.get(message.gameId) as MinesweeperGame;
-        const currentPlayer = this.clientService.getPlayer(ws.uuid);
+        const currentPlayer = await this.clientService.getPlayer(ws.uuid);
 
         const cell = game.grid[message.y][message.x];
         
@@ -211,9 +211,9 @@ export class SessionController implements WebSocketController {
         }
     }
 
-    private newGame(newGame: NewGame, ws: WebSocketClient): void {
+    private async newGame(newGame: NewGame, ws: WebSocketClient): Promise<void> {
         const game = this.codeWordService.generateGame(newGame.options as CodewordOptions);
-        const player = this.clientService.getPlayer(ws.uuid);
+        const player = await this.clientService.getPlayer(ws.uuid);
         game.players = [player];
         this.games.set(game.id, game);
 
@@ -226,8 +226,8 @@ export class SessionController implements WebSocketController {
         ws.send(JSON.stringify(playerJoinedGame));
     }
 
-    private joinGame(message: JoinGame, ws: WebSocketClient): void {
-        const currentPlayer = this.clientService.getPlayer(ws.uuid);
+    private async joinGame(message: JoinGame, ws: WebSocketClient): Promise<void> {
+        const currentPlayer = await this.clientService.getPlayer(ws.uuid);
         const gameId = message.gameId
         const game = this.games.get(gameId);
 
@@ -251,7 +251,7 @@ export class SessionController implements WebSocketController {
         this.sendMessageToPlayers(game, playerJoinedGame);
     }
 
-    private highlightCell(message: HighlightCell, clientId: string): void {
+    private async highlightCell(message: HighlightCell, clientId: string): Promise<void> {
         console.log("fill cell", message);
 
         let game = this.games.get(message.gameId);
@@ -265,7 +265,7 @@ export class SessionController implements WebSocketController {
             }
         }
 
-        const player = this.clientService.getPlayer(clientId);
+        const player = await this.clientService.getPlayer(clientId);
         const cellHighlighted = new CellHighlighted();
         cellHighlighted.x = message.x;
         cellHighlighted.y = message.y;
@@ -275,7 +275,7 @@ export class SessionController implements WebSocketController {
         this.sendMessageToPlayers(game, cellHighlighted);    
     }
 
-    private fillCell(message: FillCell, clientId: string): void {
+    private async fillCell(message: FillCell, clientId: string): Promise<void> {
         console.log("fill cell", message);
 
         const game = this.games.get(message.gameId);
@@ -291,7 +291,7 @@ export class SessionController implements WebSocketController {
 
         (<any>game).grid[message.x][message.y].playerValue = message.value;
 
-        const player = this.clientService.getPlayer(clientId);
+        const player = await this.clientService.getPlayer(clientId);
         const cellFilled = new CellFilled();
         cellFilled.x = message.x;
         cellFilled.y = message.y;
@@ -301,7 +301,7 @@ export class SessionController implements WebSocketController {
         this.sendMessageToPlayers(game, cellFilled);    
     }
 
-    private fillKey(message: FillKey, clientId: string): void {
+    private async fillKey(message: FillKey, clientId: string): Promise<void> {
         const game = this.games.get(message.gameId) as CodewordGame;
         if (!game) {
             console.error(`game ${message.gameId} not found!`);
@@ -310,7 +310,7 @@ export class SessionController implements WebSocketController {
 
         game.key.find(k => k.key === message.key).playerValue = message.value;
 
-        const player = this.clientService.getPlayer(clientId);
+        const player = await this.clientService.getPlayer(clientId);
         const keyFilled = new KeyFilled();
         keyFilled.key = message.key;
         keyFilled.value = message.value;
@@ -319,14 +319,14 @@ export class SessionController implements WebSocketController {
         this.sendMessageToPlayers(game, keyFilled);    
     }
 
-    private highlightWord(message: HighlightWord, ws: WebSocketClient): void {
+    private async highlightWord(message: HighlightWord, ws: WebSocketClient): Promise<void> {
         const game = this.games.get(message.gameId) as CodewordGame;
         if (!game) {
             console.error(`game ${message.gameId} not found!`);
             return;
         }
 
-        const player = this.clientService.getPlayer(ws.uuid);
+        const player = await this.clientService.getPlayer(ws.uuid);
 
         const wordHighlighted = new WordHighlighted();
         wordHighlighted.word = message.word;
