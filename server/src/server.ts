@@ -1,6 +1,7 @@
 import * as express from 'express';
 import * as expressWs from 'express-ws';
 import * as http from 'http';
+import { CosmosClient } from '@azure/cosmos';
 
 import { WordController } from './words/word.controller';
 import { WordService } from './words/word.service';
@@ -77,7 +78,12 @@ class Server {
     }
 }
 
-const clientService = new ClientService();
+const cosmosClient = new CosmosClient({
+    endpoint: "https://localhost:8081",
+    key: "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="
+});
+
+const clientService = new ClientService(cosmosClient);
 const wordService = new WordService();
 new Server(
     clientService,

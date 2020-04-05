@@ -23,6 +23,7 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
+    "@azure/cosmos": "^3.6.2",
     "big-screen-puzzles-contract": "file:../contract",
     "express": "^4.17.1",
     "express-ws": "^4.0.0",

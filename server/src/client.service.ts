@@ -1,8 +1,52 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Player } from 'big-screen-puzzles-contract';
+import { CosmosClient, Container, StatusCodes } from '@azure/cosmos';
+import { Player } from './database/player';
 
 export declare class WebSocketClient extends WebSocket {
     uuid: string;
+}
+
+export class PlayerService {
+
+    private players: Container;
+
+    constructor(
+        cosmosClient: CosmosClient
+    ) {
+        const database = cosmosClient.database("bsp");
+        this.players = database.container("players");
+    }
+
+    public async getPlayer(privateId: string): Promise<Player> {
+        const player = await this.players
+            .item(privateId, "player")
+            .read<Player>();
+
+        console.log("[GetPlayer] " + player.requestCharge + "RU");
+
+        if (player.statusCode === StatusCodes.Ok) {
+            return player.resource;
+        }
+        console.error("[GetPlayer] Failed", player.statusCode);
+    }
+
+    public async createPlayer(id: string, name: string, colour: string): Promise<Player> {
+        const player = new Player();
+        player.id = id;
+        player.privateId = uuidv4();
+        player.name = name;
+        player.colour = colour;
+
+        const response = await this.players.items.create(player);
+
+        console.log("[CreatePlayer] " + response.requestCharge + "RU");
+
+        if (response.statusCode === StatusCodes.Created) {
+            return response.resource;
+        }
+        console.error("[CreatePlayer] Failed", response.statusCode);
+    }
+
 }
 
 export class ClientService {
@@ -12,10 +56,18 @@ export class ClientService {
         const g = Math.round(Math.random() * 255);
         const b = Math.round(Math.random() * 255);
         return `rgb(${r}, ${g}, ${b})`;
-      }
+    }
 
     private clients = new Map<string, WebSocketClient>();
     private clientPlayers = new Map<string, Player>();
+
+    private playerService: PlayerService;
+
+    constructor(
+        cosmosClient: CosmosClient
+    ) {
+        this.playerService = new PlayerService(cosmosClient);
+    }
 
     public addClient(client: WebSocket, clientId: string): Player {
         const webSocketClient = client as WebSocketClient;
