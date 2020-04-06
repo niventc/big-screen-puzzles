@@ -76,14 +76,19 @@ class Server {
     }
 }
 
+process.on('unhandledRejection', (x) => {
+    console.error("UnhandledRejection", x);
+});
+
 CosmosDatabaseFactory.setupDatabase()
     .then(database => {
+        console.log("database");
         const clientService = new ClientService(database);
         const wordService = new WordService();
         new Server(
             clientService,
             [new WordController(wordService)], 
-            [new SessionController(clientService, wordService)], 
+            [new SessionController(database, clientService, wordService)], 
             process.env.PORT ? parseInt(process.env.PORT) : 3000
         ).listen();
     });

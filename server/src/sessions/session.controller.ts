@@ -9,6 +9,8 @@ import { WordService } from 'src/words/word.service';
 import { CodeWordService } from './codeword.service';
 import { MinesweeperService } from './minesweeper.service';
 import { SudokuService } from './sudoku.service';
+import { Database } from '@azure/cosmos';
+import { GameService } from '../database/game.service';
 
 export class SessionController implements WebSocketController {
 
@@ -16,17 +18,39 @@ export class SessionController implements WebSocketController {
 
     private games = new Map<string, Game>();
 
+    public gameService: GameService;
+
     private codeWordService: CodeWordService;
     private minesweeperService: MinesweeperService;
     private sudokuService: SudokuService;
 
     constructor(
+        database: Database,
         private clientService: ClientService,
         wordService: WordService
     ) {
+        this.gameService = new GameService(database);
+
         this.codeWordService = new CodeWordService(wordService);
         this.minesweeperService = new MinesweeperService();
         this.sudokuService = new SudokuService();
+
+        this.populateCodewordTemplates();
+    }
+
+    private async populateCodewordTemplates(): Promise<void> {
+        let ids = await this.gameService.getTemplateIdsFor("codeword");
+        const idCount = ids.length;
+        for (let i = idCount; i < 10; i++) {
+            const game = this.codeWordService.generateGame({
+                height: 15, 
+                width: 15,
+                name: "Standard"
+            });
+            await this.gameService.insertTemplate(game);
+        }
+        ids = await this.gameService.getTemplateIdsFor("codeword");
+        console.log("[CodewordTemplates] Codeword Templates contains " + ids.join(", "));
     }
 
     public setup(router: Router): void {
@@ -212,7 +236,13 @@ export class SessionController implements WebSocketController {
     }
 
     private async newGame(newGame: NewGame, ws: WebSocketClient): Promise<void> {
-        const game = this.codeWordService.generateGame(newGame.options as CodewordOptions);
+        const gameIds = await this.gameService.getTemplateIdsFor("codeword");
+        const random = Math.round(Math.random() * (gameIds.length - 1));
+        const gameId = gameIds[random];
+        console.log("Picked " + random + " - " + gameId);
+        const game = await this.gameService.getTemplate('codeword', gameId) as CodewordGame;
+
+        // const game = this.codeWordService.generateGame(newGame.options as CodewordOptions);
         const player = await this.clientService.getPlayer(ws.uuid);
         game.players = [player];
         this.games.set(game.id, game);

@@ -30,5 +30,9 @@ module.exports = {
         contentBase: path.join(__dirname, 'dist'),
         filename: 'server.js',
         port: 3000
+    },
+    // until azure roll forward with this fix https://github.com/node-fetch/node-fetch/issues/667
+    optimization: {
+        minimize: false
     }
 };

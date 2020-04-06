@@ -20,7 +20,9 @@ export class PlayerService {
                         ]
                     }
                 });
+
             console.log("[GetOrCreateContainer] players " + container.requestCharge + "RU");
+
             if (container.statusCode === StatusCodes.Ok || container.statusCode === StatusCodes.Created) {
                 this.players = container.container;
             }
@@ -35,7 +37,9 @@ export class PlayerService {
         const player = await (await this.getPlayersContainer())
             .item(id, "player")
             .read<Player>();
+
         console.log("[GetPlayer] " + player.requestCharge + "RU");
+
         if (player.statusCode === StatusCodes.Ok) {
             return player.resource;
         }
@@ -48,8 +52,11 @@ export class PlayerService {
         player.publicId = uuidv4();
         player.name = name;
         player.colour = colour;
+
         const response = await (await this.getPlayersContainer()).items.create(player);
+
         console.log("[CreatePlayer] " + response.requestCharge + "RU");
+
         if (response.statusCode === StatusCodes.Created) {
             return response.resource;
         }
@@ -67,10 +74,13 @@ export class PlayerService {
         if (colour) {
             player.colour = colour;
         }
+
         const response = await (await this.getPlayersContainer())
             .item(id, "player")
             .replace<Player>(player);
+
         console.log("[UpdatePlayer] " + response.requestCharge + "RU");
+
         if (response.statusCode === StatusCodes.Ok) {
             return response.resource;
         }
