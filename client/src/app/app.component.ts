@@ -11,6 +11,7 @@ import { Options } from 'big-screen-puzzles-contract';
 export class AppComponent {
 
   public selectedGame: string;
+  public options: Options[];
   public selectedOptions: Options;
 
   public games: string[] = [
@@ -27,7 +28,7 @@ export class AppComponent {
 
   constructor(
     router: Router,
-    private gameService: GameService
+    public gameService: GameService
   ) {
 
     router.events.subscribe(e => {
@@ -42,12 +43,10 @@ export class AppComponent {
 
   }
 
-  public getOptions(type: string): Options[] {
-    const options = this.gameService.getOptions(type);
-    if (!this.selectedOptions) {
-      this.selectedOptions = options[0];
-    }
-    return options;
+  public selectGame(game: string): void {
+    this.options = this.gameService.getOptions(game);
+    this.selectedOptions = this.options[0];
+    this.selectedGame = game;
   }
  
   public newGame(type: string): void {

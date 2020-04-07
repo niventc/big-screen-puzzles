@@ -27,6 +27,8 @@ export abstract class GameProvider {
 @Injectable()
 export class GameService {
 
+    public currentGameId: string;
+
     constructor(
         private router: Router,
         private webSocketService: WebSocketService,
@@ -49,6 +51,8 @@ export class GameService {
                     } else {
                         provider.setGame(newGameCreated.game);
                         this.router.navigate([newGameCreated.game.type, newGameCreated.game.id]);
+
+                        this.currentGameId = newGameCreated.game.id;
                     }
                 } else if (message.type === "JoinGameSucceeded") {
                     const joinGame = message as JoinGameSucceeded;
@@ -59,6 +63,8 @@ export class GameService {
                     } else {
                         provider.setGame(joinGame.game);
                         this.router.navigate([joinGame.game.type, joinGame.game.id]);
+
+                        this.currentGameId = joinGame.game.id;
                     }
                 }
             });

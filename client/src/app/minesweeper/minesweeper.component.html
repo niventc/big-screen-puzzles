@@ -1,7 +1,5 @@
 
-<game-id [gameId]="game?.id"></game-id>
-
-<button (click)="revealMines = !revealMines" [style.backgroundColor]="revealMines ? 'red' : ''">Toggle Reveal Mines</button>
+<button [style.backgroundColor]="revealMines ? 'red' : ''" (mousedown)="revealMines = true" (mouseup)="revealMines = false">Hold to Reveal</button>
 <button (click)="placeFlag = !placeFlag" [style.backgroundColor]="placeFlag ? 'red' : ''">Place Flag</button>
 
 <div class="grid" *ngFor="let row of game?.grid; let y = index" style="display: flex">

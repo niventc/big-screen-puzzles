@@ -1,7 +1,5 @@
 <div>
-    <game-id [gameId]="game?.id"></game-id>
-
-    <button (click)="reveal = !reveal">Toggle Reveal</button>
+    <button [style.backgroundColor]="reveal ? 'red' : ''" (mousedown)="reveal = true" (mouseup)="reveal = false">Hold to Reveal</button>
 
     <div class="grid" [ngStyle]="{ 'width': (9 * 32) + 'px' }">
         <div class="row" *ngFor="let row of game?.grid; index as rowIndex" style="display: flex; width: 100%">

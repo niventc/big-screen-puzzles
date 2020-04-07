@@ -193,6 +193,11 @@ export class SessionController implements WebSocketController {
         const currentPlayer = await this.clientService.getPlayer(ws.uuid);
 
         const cell = game.grid[message.y][message.x];
+
+        if (cell.isSelected) {
+            // do nothing
+            return;
+        }
         
         if (message.placeFlag) {
             cell.isFlag = true;

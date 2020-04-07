@@ -1,0 +1,12 @@
+<div class="panel" style="height: 90%; overflow-y: auto">
+
+    <h3>Events</h3>
+    <div class="list-item" *ngFor="let event of events">
+        {{event}}
+    </div>
+
+    <div class="list-item" *ngIf="events.length === 0">
+        No events yet!
+    </div>
+
+</div>

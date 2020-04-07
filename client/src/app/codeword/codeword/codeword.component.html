@@ -1,6 +1,4 @@
 
-<game-id [gameId]="game?.id"></game-id>
-
 <div style="display: flex">
     <div style="display: flex; flex-direction: column;">
         <div class="grid" [ngStyle]="{ 'width': (width * 32) + 'px' }">
@@ -22,30 +20,31 @@
                 </div>
             </div>
         </div>
+        
+    </div>
 
-        <div>
-            <h1>Key</h1>        
-            <div class="row" style="display: flex; width: 416px; flex-flow: row; flex-wrap: wrap;">
-                <div *ngFor="let key of game?.key" 
-                    style="position: relative;"
-                    (click)="updateKey(key, selectedCharacter)">
-                    <input type="text" 
-                        class="input-cell" 
-                        maxlength="1" 
-                        style="flex: 0 0 26px;"
-                        [readonly]="key.isLocked"
-                        [style.fontWeight]="key.isLocked ? 'bold' : 'normal'"
-                        (keyup)="updateKey(key, $event.key)"
-                        [value]="reveal ? key.value : (key.playerValue ? key.playerValue : (key.isLocked ? key.value : ''))">  
-                    <span class="key">{{key.key}}</span>
-                </div>
+    <div style="flex: 1 1 auto; color: white; padding: 0 50px">
+        <h1>Key</h1>        
+        <div class="row" style="display: flex; width: 64px; flex-flow: row; flex-wrap: wrap;">
+            <div *ngFor="let key of game?.key" 
+                style="position: relative;"
+                (click)="updateKey(key, selectedCharacter)">
+                <input type="text" 
+                    class="input-cell" 
+                    maxlength="1" 
+                    style="flex: 0 0 26px;"
+                    [readonly]="key.isLocked"
+                    [style.fontWeight]="key.isLocked ? 'bold' : 'normal'"
+                    (keyup)="updateKey(key, $event.key)"
+                    [value]="reveal ? key.value : (key.playerValue ? key.playerValue : (key.isLocked ? key.value : ''))">  
+                <span class="key">{{key.key}}</span>
             </div>
         </div>
     </div>
 
     <div style="flex: 1 1 auto; color: white; padding: 0 50px">
         <h1>Control</h1>
-        <button (click)="reveal = !reveal">Toggle Reveal</button>
+        <button (mousedown)="reveal = true" (mouseup)="reveal = false">Hold to Reveal</button>
         <button [ngClass]="{ 'selected': 'clear' === selectedCharacter }" (click)="selectCharacter('clear')">Clear Cell</button>
         <div class="row" style="display: flex; width: 64px; flex-flow: row; flex-wrap: wrap;">
             <button style="flex: 0 0 32px; height: 32px" 
@@ -54,18 +53,7 @@
                     (click)="selectCharacter(char)">
                 {{char}}
             </button>
-        </div>
-
-        
+        </div>        
     </div>
 
-    <div style="flex: 0 1 400px; color: white">
-
-        <h1>Events</h1>
-        <ul>
-            <li *ngFor="let event of events">
-                {{event}}
-            </li>
-        </ul>
-    </div>
 </div>

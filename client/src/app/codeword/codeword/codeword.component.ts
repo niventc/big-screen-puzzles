@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { WebSocketService } from 'src/app/websocket.service';
 import { Cell, CellFilled, FillCell, FillKey, Key, KeyFilled, HighlightWord, WordHighlighted, CodewordGame } from 'big-screen-puzzles-contract';
 import { CodewordGameProvider } from '../codeword.game-provider';
+import { EventService } from 'src/app/shared/events/event.service';
 
 @Component({
   selector: 'app-codeword',
@@ -21,11 +22,10 @@ export class CodewordComponent implements OnInit {
 
   public selectedCharacter = '';
 
-  public events = new Array<string>();
-
   constructor(
     private gameProvider: CodewordGameProvider,
-    private webSocketService: WebSocketService
+    private webSocketService: WebSocketService,
+    private eventService: EventService
   ) {
   }
 
@@ -46,9 +46,9 @@ export class CodewordComponent implements OnInit {
           this.game.grid[cellFilled.x][cellFilled.y].playerValue = cellFilled.value as string;
 
           if (cellFilled.value) {
-            this.events.unshift(`${cellFilled.byPlayer.name} placed a ${cellFilled.value}!`);
+            this.eventService.addEvent(`${cellFilled.byPlayer.name} placed a ${cellFilled.value}!`);
           } else {
-            this.events.unshift(`${cellFilled.byPlayer.name} cleared a cell!`);
+            this.eventService.addEvent(`${cellFilled.byPlayer.name} cleared a cell!`);
           }
 
           this.checkIfWordRevealed(cellFilled);
@@ -57,9 +57,9 @@ export class CodewordComponent implements OnInit {
           this.game.key.find(k => k.key === keyFilled.key).playerValue = keyFilled.value;
 
           if (keyFilled.value) {
-            this.events.unshift(`${keyFilled.byPlayer.name} thinks ${keyFilled.key} is ${keyFilled.value}!`);
+            this.eventService.addEvent(`${keyFilled.byPlayer.name} thinks ${keyFilled.key} is ${keyFilled.value}!`);
           } else {
-            this.events.unshift(`${keyFilled.byPlayer.name} cleared key ${keyFilled.key}!`);
+            this.eventService.addEvent(`${keyFilled.byPlayer.name} cleared key ${keyFilled.key}!`);
           }          
         } else if (message.type === "WordHighlighted") {
           const wordHighlighted = message as WordHighlighted;
@@ -77,7 +77,7 @@ export class CodewordComponent implements OnInit {
       for (let x = 0; x < this.game.grid.length; x++) {
         for (let y = 0; y < this.game.grid[0].length; y++) {
           const cell = this.game.grid[x][y];
-          if (cell.words.includes(word) && cell.value !== cell.playerValue) {
+          if (cell.words.includes(word) && (!cell.playerValue || cell.value.toLowerCase() !== cell.playerValue.toLowerCase())) {
             allLetters = false;
           }
         }
@@ -85,7 +85,7 @@ export class CodewordComponent implements OnInit {
       
       if (allLetters) {
         const definition = this.game.words.find(w => w.value === word);
-        this.events.unshift(`${cellFilled.byPlayer.name} uncovered '${word}' which means '${definition.definition}'!`);
+        this.eventService.addEvent(`${cellFilled.byPlayer.name} uncovered '${word}' which means '${definition.definition}'!`);
       }
     }
   }
@@ -163,7 +163,7 @@ export class CodewordComponent implements OnInit {
       console.log("existingkey", existingKey);
       if (existingKey) {
         // value already set to key
-        this.events.unshift(`[PRIVATE] Value ${value} already set in key!`);
+        this.eventService.addEvent(`[PRIVATE] Value ${value} already set in key!`);
         return;
       }
 

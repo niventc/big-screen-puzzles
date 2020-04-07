@@ -30,8 +30,14 @@
         <router-outlet>
         </router-outlet>
     </div>
+
+    <div style="display: flex; flex-direction: column; width: 400px">
+        <game-id [gameId]="gameService.currentGameId"></game-id>
+
+        <players></players>
     
-    <players></players>
+        <events style="height: 50vh; overflow: hidden"></events>
+    </div>    
 
 </div>
 
@@ -50,7 +56,7 @@
         </div>
         <ng-container *ngIf="showGames">
             <ng-container *ngFor="let game of games">
-                <div class="game-tile" *ngIf="!selectedGame || game === selectedGame" (click)="selectedGame = game">
+                <div class="game-tile" *ngIf="!selectedGame || game === selectedGame" (click)="selectGame(game)">
                     {{game}}
                 </div>
             </ng-container>
@@ -58,7 +64,7 @@
 
         <div class="game-tile" *ngIf="selectedGame">
             <select style="height: 100%; width: 100%" [(ngModel)]="selectedOptions">
-                <option *ngFor="let option of getOptions(selectedGame)" [ngValue]="option">
+                <option *ngFor="let option of options" [ngValue]="option">
                     {{option | json}}
                     <!-- <span *ngIf="option.numberOfMines"> {{option.numberOfMines}} mines</span> -->
                 </option>

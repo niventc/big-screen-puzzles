@@ -14,11 +14,11 @@ export class CodewordGameProvider extends GameProvider {
             width: 15,
             height: 15
         },
-        <CodewordOptions>{
-            name: "Extreme",
-            width: 20,
-            height: 20
-        }
+        // <CodewordOptions>{
+        //     name: "Extreme",
+        //     width: 20,
+        //     height: 20
+        // }
     ];
 
     public thisGame$ = this.game$;
