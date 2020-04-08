@@ -8,3 +8,4 @@ export * from './src/sudoku';
 export * from './src/player';
 export * from './src/game';
 export * from './src/options';
+export * from './src/party';

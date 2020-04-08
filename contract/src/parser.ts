@@ -1,6 +1,7 @@
 import { Message, Heartbeat, NewGame, JoinGame, PlayerConnected, NewGameCreated, JoinGameSucceeded, PlayerJoinedGame, PlayerUpdated, UpdatePlayer, GameOver, CellFilled, FillCell, HighlightCell, CellHighlighted } from './messages';
 import { SelectMinesweeperCell, MinesweeperCellSelected } from './minesweeper/messages';
 import { KeyFilled, WordHighlighted, FillKey, HighlightWord } from './codeword/messages';
+import { StartParty, JoinParty, LeaveParty, PartyJoined, JoinedParty, LeftParty } from './party';
 
 export class Parser {
 
@@ -64,6 +65,26 @@ export class Parser {
                 return Object.assign(new FillKey(), typedMessage);
             case "HighlightWord":
                 return Object.assign(new HighlightWord(), typedMessage);
+
+            // Party
+            case "StartParty":
+                return Object.assign(new StartParty(), typedMessage);
+            case "JoinParty":
+                return Object.assign(new JoinParty(), typedMessage);
+            case "LeaveParty":
+                return Object.assign(new LeaveParty(), typedMessage);
+            
+            case "PartyJoined":
+                return Object.assign(new PartyJoined(), typedMessage);
+            case "JoinedParty":
+                return Object.assign(new JoinedParty(), typedMessage);
+            case "LeftParty":
+                return Object.assign(new LeftParty(), typedMessage);
+            // case "JoinParty":
+            //     return Object.assign(new JoinParty(), typedMessage);
+            // case "JoinParty":
+            //     return Object.assign(new JoinParty(), typedMessage);
+
             default:
                 return undefined;
         }

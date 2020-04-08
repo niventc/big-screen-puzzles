@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Player, PlayerUpdated, PlayerJoinedGame, JoinGameSucceeded, NewGameCreated } from 'big-screen-puzzles-contract';
+import { Player, PlayerUpdated, PlayerJoinedGame, JoinGameSucceeded, NewGameCreated, PartyJoined, JoinedParty } from 'big-screen-puzzles-contract';
 import { WebSocketService } from 'src/app/websocket.service';
 
 @Component({
@@ -26,6 +26,19 @@ export class PlayersComponent implements OnInit {
       .subscribe(message => {
 
         switch (message.type) {
+          case "PartyJoined":
+            const partyJoined = message as PartyJoined;
+            partyJoined.party.players.forEach(player => {
+              console.log("adding player", player);
+              this.playerMap.set(player.id, player);
+            });
+            break;
+
+          case "JoinedParty":
+            const joinedParty = message as JoinedParty;
+            this.playerMap.set(joinedParty.player.id, joinedParty.player);
+            break;
+
           case "JoinGameSucceeded":
             this.playerMap = new Map<string, Player>();
             const joinGameSucceeded = message as JoinGameSucceeded;
@@ -36,8 +49,12 @@ export class PlayersComponent implements OnInit {
             break;
 
           case "NewGameCreated":
-            this.playerMap = new Map<string, Player>();
             const newGameCreated = message as NewGameCreated;
+            if (newGameCreated.partyId) {
+              // ignore if we're in a party
+              break;
+            }
+            this.playerMap = new Map<string, Player>();
             newGameCreated.game.players.forEach(player => {
               this.playerMap.set(player.id, player);
             });

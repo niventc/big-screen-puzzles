@@ -1,0 +1,19 @@
+<div class="panel" style="height: 90%; overflow-y: auto">
+
+    <h3>Party</h3>
+    <div class="list-item" *ngIf="party">
+        {{party.partyId}}
+    </div>
+    <div class="list-item" *ngIf="party && party.currentGame">
+        {{ party.currentGame[0]}}: {{ party.currentGame[1]}} <button (click)="joinGame()">Join</button>
+    </div>
+
+    <div class="list-item" *ngIf="!party">
+        <button (click)="startParty()">Start a party!</button>
+    </div>
+    <div class="list-item" *ngIf="!party">
+        <input type="text" [(ngModel)]="joinPartyId">
+        <button (click)="joinParty()">Join a party!</button>
+    </div>
+
+</div>

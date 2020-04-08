@@ -28,6 +28,7 @@ export class PlayerUpdated extends Message {
 
 export class NewGameCreated extends Message {
     public game: Game;
+    public partyId?: string;
     
     constructor() {
         super("NewGameCreated");
@@ -36,6 +37,7 @@ export class NewGameCreated extends Message {
 
 export class JoinGameSucceeded extends Message {
     public game: Game;
+    public partyId?: string;
 
     constructor() {
         super("JoinGameSucceeded");
@@ -43,6 +45,7 @@ export class JoinGameSucceeded extends Message {
 }
 
 export class PlayerJoinedGame extends Message {
+    public gameId: string;
     public player: Player;
 
     constructor() {
@@ -51,6 +54,7 @@ export class PlayerJoinedGame extends Message {
 }
 
 export class CellFilled extends Message {
+    public gameId: string;
     public x: number;
     public y: number;
     public value: string | number;
@@ -62,6 +66,7 @@ export class CellFilled extends Message {
 }
 
 export class CellHighlighted extends Message {
+    public gameId: string;
     public x: number;
     public y: number;
     public byPlayer: Player;
@@ -105,6 +110,7 @@ export class HighlightCell extends Message {
 export class NewGame extends Message {
     public gameType: string;
     public options: Options;
+    public partyId?: string;
 
     constructor() {
         super("NewGame");
@@ -112,6 +118,7 @@ export class NewGame extends Message {
 }
 
 export class GameOver extends Message {
+    public gameId: string;
     public isSuccess: boolean;
     public timeTaken: number;
 
